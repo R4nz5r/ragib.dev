@@ -1,0 +1,26 @@
+[
+  {
+    "slug": "building-fast-web-apps-with-nextjs",
+    "title": "Building Fast Web Apps with Next.js",
+    "description": "Notes and architectural insights on Building Fast Web Apps with Next.js.",
+    "tags": [
+      "Next.js",
+      "TypeScript"
+    ],
+    "publishedAt": "2026-09-21",
+    "readingTime": 1
+  },
+  {
+    "slug": "building-popcorn-real-time-synchronized-watch-parties",
+    "title": "Building Popcorn: Real-Time Synchronized Watch Parties",
+    "description": "How I built Popcorn—a real-time watch party platform featuring sub-second video synchronization, WebRTC screen sharing, and live chat with Next.js and Socket.io.",
+    "tags": [
+      "Next.js",
+      "TypeScript",
+      "Architecture"
+    ],
+    "publishedAt": "2026-09-21",
+    "readingTime": 1,
+    "cover": "/posts/popcorn/cover.png"
+  }
+]

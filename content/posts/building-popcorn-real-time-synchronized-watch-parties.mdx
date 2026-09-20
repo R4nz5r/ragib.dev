@@ -1,0 +1,50 @@
+---
+title: "Building Popcorn: Real-Time Synchronized Watch Parties"
+description: "How I built Popcorn—a real-time watch party platform featuring sub-second video synchronization, WebRTC screen sharing, and live chat with Next.js and Socket.io."
+publishedAt: "2026-09-21"
+tags:
+  - Next.js
+  - TypeScript
+  - Architecture
+featured: true
+cover: "/posts/popcorn/cover.png"
+draft: false
+---
+
+Watching videos online with friends often leads to the same frustrating countdown: *"3, 2, 1... press play!"* and someone is always three seconds behind. 
+
+To solve this, I built **[Popcorn](https://github.com/R4nz5r/Popcorn)**, an open-source watch-party web application that keeps video playback synchronized across all participants with low latency, integrated chat, host controls, and peer-to-peer screen sharing.
+
+---
+
+## The Tech Stack
+
+- **Frontend & App Framework**: Next.js (App Router), React, TypeScript, Tailwind CSS
+- **Real-Time Sync & Chat**: Socket.io (Node.js & TypeScript)
+- **Database & Persistence**: MongoDB Atlas
+- **Media Playback**: YouTube IFrame Player API
+- **Screen Sharing**: WebRTC Peer-to-Peer connections
+
+---
+
+## How Video Synchronization Works
+
+The hardest part of a watch party app is handling network latency jitter. If the host pauses, seeks, or buffers, everyone else must match their exact playback state without stuttering or looping.
+
+### 1. The Host-Authority Model
+
+We designate room creators as hosts with broadcast authority:
+
+```tsx title="hooks/useRoomSync.ts" {4,9-12}
+// When host plays or seeks, broadcast the timestamp with local time
+function handleSeek(targetSeconds: number) {
+  if (!isHost) return;
+
+  socket.emit("sync:playback", {
+    roomId,
+    action: "SEEK",
+    currentTime: targetSeconds,
+    sentAt: Date.now(),
+  });
+}
+```

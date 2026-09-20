@@ -1,0 +1,1333 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>margin: personal tech blog UI kit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ==========================================================
+   SHELL (the presentation chrome around the design frames)
+   Follows the viewer's light/dark setting.
+   ========================================================== */
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --sh-bg:#f4f4f5; --sh-panel:#ffffff; --sh-text:#18181b; --sh-muted:#52525b; --sh-line:#d4d4d8;
+  --sh-accent:#5b37f2; --sh-tint:rgba(91,55,242,.10); --sh-canvas:#e4e4e7;
+  --sans:"Plus Jakarta Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --sh-bg:#09090b; --sh-panel:#111114; --sh-text:#f4f4f5; --sh-muted:#a1a1aa; --sh-line:#27272a;
+    --sh-accent:#a794ff; --sh-tint:rgba(167,148,255,.14); --sh-canvas:#0d0d10;
+  }
+}
+:root[data-theme="dark"]{
+  --sh-bg:#09090b; --sh-panel:#111114; --sh-text:#f4f4f5; --sh-muted:#a1a1aa; --sh-line:#27272a;
+  --sh-accent:#a794ff; --sh-tint:rgba(167,148,255,.14); --sh-canvas:#0d0d10;
+}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--sh-bg);color:var(--sh-text);font:400 16px/24px var(--sans);-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit}
+.ic{width:16px;height:16px;flex:none;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ic--20{width:20px;height:20px}
+.ic--24{width:24px;height:24px}
+
+.sh-bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;background:var(--sh-panel);border-bottom:1px solid var(--sh-line)}
+.sh-bar__in{max-width:1440px;margin:0 auto;padding:16px 24px;display:flex;flex-wrap:wrap;align-items:center;gap:16px 24px}
+.sh-title{display:flex;flex-direction:column;margin-right:auto}
+.sh-title b{font:700 16px/24px var(--mono);letter-spacing:-.02em}
+.sh-title span{font:400 13px/18px var(--sans);color:var(--sh-muted)}
+.tabs{display:flex;gap:8px;overflow-x:auto;max-width:100%}
+.tab{height:40px;padding:0 16px;border:1px solid transparent;border-radius:8px;background:transparent;cursor:pointer;font:600 14px/24px var(--sans);color:var(--sh-muted);white-space:nowrap}
+.tab:hover{color:var(--sh-text)}
+.tab[aria-selected="true"]{color:var(--sh-accent);background:var(--sh-tint);border-color:var(--sh-accent)}
+.tab:focus-visible,.seg button:focus-visible,.chk:focus-within{outline:2px solid var(--sh-accent);outline-offset:2px}
+.ctl{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;width:100%;padding-top:16px;border-top:1px solid var(--sh-line)}
+.ctl[hidden],.ctl__g[hidden],.chk[hidden]{display:none}
+.ctl__g{display:flex;align-items:center;gap:8px}
+.ctl__l{font:500 13px/18px var(--mono);color:var(--sh-muted)}
+.seg{display:inline-flex;border:1px solid var(--sh-line);border-radius:8px;overflow:hidden}
+.seg button{height:32px;padding:0 16px;border:0;background:transparent;cursor:pointer;font:600 13px/18px var(--sans);color:var(--sh-muted)}
+.seg button + button{border-left:1px solid var(--sh-line)}
+.seg button[aria-pressed="true"]{background:var(--sh-tint);color:var(--sh-accent)}
+.chk{display:inline-flex;align-items:center;gap:8px;height:32px;padding:0 16px;border:1px solid var(--sh-line);border-radius:8px;cursor:pointer;font:600 13px/18px var(--sans);color:var(--sh-muted)}
+.chk input{accent-color:var(--sh-accent);margin:0}
+.chk:has(input:checked){color:var(--sh-accent);background:var(--sh-tint);border-color:var(--sh-accent)}
+@media (max-width:720px){.sh-bar{position:static}}
+
+.panel[hidden]{display:none}
+.doc{max-width:1440px;margin:0 auto;padding:48px 24px 96px}
+.blk{margin-top:64px}
+.blk:first-child{margin-top:0}
+.blk__h{font:700 24px/32px var(--sans);letter-spacing:-.01em;margin:0 0 8px}
+.blk__p{margin:0 0 24px;max-width:720px;color:var(--sh-muted)}
+.blk__sub{font:600 14px/24px var(--sans);margin:32px 0 8px;color:var(--sh-text)}
+.blk__sub:first-of-type{margin-top:0}
+.stage{max-width:1440px;margin:0 auto;padding:32px 24px 96px}
+.canvas{scroll-margin-top:120px;background:var(--sh-canvas);border:1px solid var(--sh-line);border-radius:12px;padding:24px;overflow-x:auto}
+.canvas__l{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:baseline;margin:0 0 16px;font:600 13px/18px var(--mono);color:var(--sh-text)}
+.canvas__l span{font-weight:400;color:var(--sh-muted)}
+.frame{position:relative;margin:0 auto;border:1px solid var(--sh-line);border-radius:0;box-shadow:0 8px 32px rgba(0,0,0,.18)}
+.frame > .ab{position:absolute;top:0;left:0;transform-origin:0 0}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:24px}
+.tbl{width:100%;border-collapse:collapse;font:400 14px/24px var(--sans);background:var(--sh-panel);border:1px solid var(--sh-line);border-radius:12px;overflow:hidden;display:block;overflow-x:auto}
+.tbl thead,.tbl tbody{display:table;width:100%;table-layout:fixed;min-width:640px}
+.tbl th,.tbl td{text-align:left;padding:8px 16px;border-bottom:1px solid var(--sh-line);vertical-align:top}
+.tbl th{font:600 13px/18px var(--mono);color:var(--sh-muted)}
+.tbl td code{font:500 13px/18px var(--mono);color:var(--sh-accent)}
+.tbl tr:last-child td{border-bottom:0}
+.sw-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px}
+.sw{display:flex;flex-direction:column;border:1px solid var(--sh-line);border-radius:12px;overflow:hidden;background:var(--sh-panel)}
+.sw i{display:block;height:64px;border-bottom:1px solid var(--sh-line)}
+.sw div{padding:8px 16px 16px;display:flex;flex-direction:column}
+.sw b{font:600 14px/24px var(--sans)}
+.sw code{font:500 13px/18px var(--mono);color:var(--sh-muted)}
+.sw small{font:400 13px/18px var(--sans);color:var(--sh-muted);margin-top:8px}
+.tile{border:1px solid var(--sh-line);border-radius:12px;padding:24px;overflow-x:auto}
+.tile.ds{background:var(--bg);border-color:var(--border)}
+.spec{display:grid;grid-template-columns:auto 1fr;gap:0 24px;margin:16px 0 0;padding:16px 0 0;border-top:1px solid var(--border);font:500 13px/24px var(--font-mono)}
+.spec dt{color:var(--text-4)}
+.spec dd{margin:0;color:var(--text-2)}
+.mx{display:grid;grid-template-columns:96px repeat(5,max-content);gap:24px;align-items:center;min-width:max-content}
+.mx__h{font:500 13px/18px var(--font-mono);color:var(--text-3)}
+.mx__r{font:600 14px/24px var(--font-ui);color:var(--text)}
+.demo{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start}
+.demo__i{display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+.demo__c{font:500 13px/18px var(--font-mono);color:var(--text-3)}
+
+/* ==========================================================
+   DESIGN SYSTEM TOKENS (scope: .ds). Dark is the default mode.
+   Spacing is base-8. --s-0 (4px) is the only half-step, used for
+   inline-code padding and the smallest icon gaps.
+   ========================================================== */
+.ds{
+  --bg:#09090b; --surface:#111113; --surface-2:#18181b; --surface-3:#27272a;
+  --border:#27272a; --border-strong:#3f3f46;
+  --text:#fafafa; --text-2:#d4d4d8; --text-3:#a1a1aa; --text-4:#84848e;
+  --accent:#6d4aff; --accent-hover:#5b37f2; --accent-press:#4a28d0; --accent-text:#a794ff;
+  --accent-tint:rgba(124,92,255,.14); --accent-line:rgba(151,124,255,.55); --on-accent:#ffffff;
+  --info-bg:rgba(124,92,255,.10); --info-line:rgba(151,124,255,.40); --info-ic:#a794ff;
+  --warn-bg:rgba(245,158,11,.10); --warn-line:rgba(245,158,11,.40); --warn-ic:#fbbf24;
+  --code-bg:#0c0c0f; --code-text:#e4e4e7;
+  --c-kw:#b9a4ff; --c-str:#7ee2a8; --c-fn:#7cc4ff; --c-ty:#ffcf7d; --c-cm:#7a7a85; --c-num:#ffb38a; --c-pn:#a1a1aa;
+  --shadow-hover:0 8px 24px rgba(0,0,0,.45);
+  --s-0:4px; --s-1:8px; --s-2:16px; --s-3:24px; --s-4:32px; --s-6:48px; --s-8:64px;
+  --r-sm:6px; --r-md:8px; --r-lg:12px; --r-full:999px;
+  --font-ui:"Plus Jakarta Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+.ds[data-mode="light"]{
+  --bg:#fafafa; --surface:#ffffff; --surface-2:#f4f4f5; --surface-3:#e4e4e7;
+  --border:#e4e4e7; --border-strong:#d4d4d8;
+  --text:#09090b; --text-2:#3f3f46; --text-3:#52525b; --text-4:#71717a;
+  --accent-text:#5b37f2; --accent-tint:rgba(109,74,255,.08); --accent-line:rgba(109,74,255,.45);
+  --info-bg:rgba(109,74,255,.06); --info-line:rgba(109,74,255,.30); --info-ic:#5b37f2;
+  --warn-bg:rgba(217,119,6,.08); --warn-line:rgba(217,119,6,.40); --warn-ic:#b45309;
+  --code-bg:#f4f4f5; --code-text:#27272a;
+  --c-kw:#6d28d9; --c-str:#047857; --c-fn:#0369a1; --c-ty:#b45309; --c-cm:#6b6b75; --c-num:#c2410c; --c-pn:#52525b;
+  --shadow-hover:0 8px 24px rgba(24,24,27,.12);
+}
+
+/* resets, zero specificity so component classes always win */
+:where(.ds){font-family:var(--font-ui);color:var(--text);font-size:16px;line-height:24px;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+:where(.ds) :is(h1,h2,h3,h4,p,figure,blockquote,ul,ol,dl,dd){margin:0}
+:where(.ds) :is(ul,ol){padding:0;list-style:none}
+:where(.ds) a{color:inherit;text-decoration:none}
+:where(.ds) :is(button,input){font:inherit;color:inherit}
+:where(.ds) button{cursor:pointer}
+:where(.ds) summary{list-style:none}
+:where(.ds) summary::-webkit-details-marker{display:none}
+
+/* type scale (desktop): H1 40/48, H2 32/40, H3 24/32, Body 16/24, Caption 13/18
+   extensions: Label 14/24 (controls), Prose 18/32 (lead + article body) */
+.t-h1{font:700 40px/48px var(--font-ui);letter-spacing:-.02em}
+.t-h2{font:700 32px/40px var(--font-ui);letter-spacing:-.015em}
+.t-h3{font:600 24px/32px var(--font-ui);letter-spacing:-.01em}
+.t-body{font:400 16px/24px var(--font-ui)}
+.t-cap{font:500 13px/18px var(--font-ui)}
+.t-meta{font:500 13px/18px var(--font-mono)}
+.t-label{font:600 14px/24px var(--font-ui)}
+.t-prose{font:400 18px/32px var(--font-ui)}
+.t-h1,.t-h2,.card__title,.prose h2,.prose h3{text-wrap:balance}
+.prose p,.card__ex{text-wrap:pretty}
+
+/* ---------- Layout primitives ---------- */
+.ab{container:ab / inline-size;position:relative;overflow:hidden;background:var(--bg)}
+.ab--d{width:1440px}
+.ab--m{width:390px}
+.wrap{width:100%;max-width:1200px;margin-inline:auto}
+.grid12{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:var(--s-3);row-gap:var(--s-3)}
+.c-3{grid-column:span 3}.c-4{grid-column:span 4}.c-5{grid-column:span 5}.c-6{grid-column:span 6}
+.c-7{grid-column:span 7}.c-8{grid-column:span 8}.c-9{grid-column:span 9}.c-12{grid-column:1/-1}
+.at-7{grid-column:7/span 3}.at-10{grid-column:10/span 3}
+.ab__grid{position:absolute;inset:0;pointer-events:none;z-index:30;display:none}
+body.show-grid .ab__grid{display:block}
+.ab__grid .wrap{height:100%}
+.ab__cols{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:var(--s-3);height:100%}
+.ab__grid i{display:block;background:rgba(255,64,129,.10);border-inline:1px solid rgba(255,64,129,.28)}
+
+/* ---------- Icons, avatar ---------- */
+.avatar{flex:none;display:inline-grid;place-items:center;width:32px;height:32px;border-radius:var(--r-full);background:var(--accent-tint);border:1px solid var(--accent-line);color:var(--accent-text);font:700 13px/1 var(--font-mono)}
+.avatar--48{width:48px;height:48px;font-size:16px}
+
+/* ---------- Button ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--s-1);height:40px;padding:0 var(--s-2);border:1px solid transparent;border-radius:var(--r-md);font:600 14px/24px var(--font-ui);white-space:nowrap;text-decoration:none;cursor:pointer;transition:background-color .15s,border-color .15s,color .15s,box-shadow .15s,transform .15s}
+.btn--sm{height:32px;padding:0 var(--s-2);font-size:13px;line-height:18px}
+.btn--lg{height:48px;padding:0 var(--s-3);font-size:16px}
+.btn--icon{width:40px;padding:0}
+.btn--icon.btn--sm{width:32px}
+.btn--primary{background:var(--accent);color:var(--on-accent)}
+.btn--primary:hover,.btn--primary.is-hover{background:var(--accent-hover);box-shadow:0 0 0 4px var(--accent-tint)}
+.btn--primary:active,.btn--primary.is-active{background:var(--accent-press);box-shadow:none;transform:translateY(1px)}
+.btn--outline{background:transparent;border-color:var(--border-strong);color:var(--text)}
+.btn--outline:hover,.btn--outline.is-hover{background:var(--surface-2);border-color:var(--text-4)}
+.btn--outline:active,.btn--outline.is-active{background:var(--surface-3);border-color:var(--text-4);transform:translateY(1px)}
+.btn--ghost{background:transparent;color:var(--text-2)}
+.btn--ghost:hover,.btn--ghost.is-hover{background:var(--surface-2);color:var(--text)}
+.btn--ghost:active,.btn--ghost.is-active{background:var(--surface-3);color:var(--text);transform:translateY(1px)}
+.btn:focus-visible,.btn.is-focus{outline:2px solid var(--accent-text);outline-offset:2px}
+.btn[disabled],.btn.is-disabled{cursor:not-allowed;transform:none;box-shadow:none}
+.btn--primary[disabled],.btn--primary.is-disabled{background:var(--surface-3);color:var(--text-4)}
+.btn--outline[disabled],.btn--outline.is-disabled{background:transparent;border-color:var(--border);color:var(--text-4)}
+.btn--ghost[disabled],.btn--ghost.is-disabled{background:transparent;color:var(--text-4)}
+.btn.is-copied{color:var(--accent-text)}
+
+/* ---------- Switch (theme toggle) ---------- */
+.switch{position:relative;flex:none;width:56px;height:32px;padding:0;border:1px solid var(--border-strong);border-radius:var(--r-full);background:var(--surface-2);transition:background-color .2s,border-color .2s}
+.switch__knob{position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:var(--r-full);background:var(--accent);color:var(--on-accent);display:grid;place-items:center;transition:transform .2s}
+.switch__knob .ic{width:14px;height:14px;grid-area:1/1}
+.switch[aria-checked="true"] .switch__knob{transform:translateX(24px)}
+.switch[aria-checked="true"] .i-sun,.switch[aria-checked="false"] .i-moon{display:none}
+.switch:focus-visible,.switch.is-focus{outline:2px solid var(--accent-text);outline-offset:2px}
+
+/* ---------- Pills and tags ---------- */
+.pill{display:inline-flex;align-items:center;gap:var(--s-1);flex:none;height:32px;padding:0 var(--s-2);border:1px solid var(--border);border-radius:var(--r-full);background:transparent;color:var(--text-3);font:500 14px/24px var(--font-ui);white-space:nowrap;transition:color .15s,border-color .15s,background-color .15s}
+.pill:hover,.pill.is-hover{color:var(--text);border-color:var(--border-strong);background:var(--surface-2)}
+.pill[aria-pressed="true"],.pill.is-active{color:var(--accent-text);border-color:var(--accent-line);background:var(--accent-tint)}
+.pill:focus-visible,.pill.is-focus{outline:2px solid var(--accent-text);outline-offset:2px}
+.pill__n{font:500 13px/18px var(--font-mono);color:var(--text-4)}
+.pill[aria-pressed="true"] .pill__n,.pill.is-active .pill__n{color:var(--accent-text);opacity:.8}
+.tag{display:inline-flex;align-items:center;height:24px;padding:0 var(--s-1);border:1px solid var(--border);border-radius:var(--r-sm);background:var(--surface-2);color:var(--text-3);font:500 13px/18px var(--font-mono);white-space:nowrap}
+.tag--active{color:var(--accent-text);border-color:var(--accent-line);background:var(--accent-tint)}
+.lang{display:inline-flex;align-items:center;height:24px;padding:0 var(--s-1);border-radius:var(--r-sm);border:1px solid var(--accent-line);background:var(--accent-tint);color:var(--accent-text);font:600 13px/18px var(--font-mono)}
+.kbd{display:inline-flex;align-items:center;flex:none;height:24px;padding:0 var(--s-1);border:1px solid var(--border-strong);border-radius:var(--r-sm);background:var(--surface-2);color:var(--text-3);font:500 13px/18px var(--font-mono)}
+
+/* ---------- Field ---------- */
+.field{display:flex;align-items:center;gap:var(--s-1);height:48px;padding:0 var(--s-2);border:1px solid var(--border-strong);border-radius:var(--r-md);background:var(--surface);color:var(--text-3);transition:border-color .15s,box-shadow .15s}
+.field input{flex:1;min-width:0;height:100%;border:0;outline:0;background:transparent;color:var(--text);font:400 16px/24px var(--font-ui)}
+.field input::placeholder{color:var(--text-4);opacity:1}
+.field:hover{border-color:var(--text-4)}
+.field:focus-within,.field.is-focus{border-color:var(--accent-text);box-shadow:0 0 0 4px var(--accent-tint)}
+
+/* ---------- Thumbnail placeholder ---------- */
+.thumb{position:relative;flex:none;aspect-ratio:16/9;display:grid;place-items:center;overflow:hidden;background-color:var(--surface-2);background-image:radial-gradient(var(--border-strong) 1px,transparent 1px);background-size:16px 16px;border-bottom:1px solid var(--border)}
+.thumb__g{font:700 40px/48px var(--font-mono);color:var(--accent-text);letter-spacing:-.02em;padding:0 var(--s-2);background:var(--surface-2);border-radius:var(--r-md)}
+.thumb__l{position:absolute;right:var(--s-1);bottom:var(--s-1);font:500 13px/18px var(--font-mono);color:var(--text-4)}
+.card--feature .thumb__g{font-size:56px;line-height:64px}
+
+/* ---------- Post card ---------- */
+.card{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;color:var(--text);transition:border-color .2s,background-color .2s,transform .2s,box-shadow .2s}
+.card:hover,.card.is-hover{border-color:var(--accent-line);background:var(--surface-2);transform:translateY(-2px);box-shadow:var(--shadow-hover)}
+.card:focus-visible{outline:2px solid var(--accent-text);outline-offset:2px}
+.card__body{display:flex;flex-direction:column;gap:var(--s-2);padding:var(--s-3);flex:1}
+.card__tags{display:flex;flex-wrap:wrap;gap:var(--s-1)}
+.card__title{font:600 24px/32px var(--font-ui);letter-spacing:-.01em;color:var(--text);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;transition:color .2s}
+.card:hover .card__title,.card.is-hover .card__title{color:var(--accent-text)}
+.card__ex{color:var(--text-3);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.card__tx{display:flex;flex-direction:column;gap:var(--s-1)}
+.card__meta{display:flex;align-items:center;justify-content:space-between;gap:var(--s-2);margin-top:auto;padding-top:var(--s-2);border-top:1px solid var(--border);font:500 13px/18px var(--font-mono);color:var(--text-3)}
+.meta{display:inline-flex;align-items:center;gap:var(--s-1);white-space:nowrap}
+.card--feature{flex-direction:row}
+.card--feature .thumb{flex:0 0 50%;aspect-ratio:auto;min-height:360px;border-bottom:0;border-right:1px solid var(--border)}
+.card--feature .card__body{padding:var(--s-4);justify-content:center}
+.card--feature .card__title{font:700 32px/40px var(--font-ui);letter-spacing:-.015em;-webkit-line-clamp:4}
+.card--feature .card__ex{-webkit-line-clamp:4}
+.card__by{display:flex;align-items:center;gap:var(--s-2);margin-top:var(--s-1)}
+.card__by div b{display:block;font:600 14px/24px var(--font-ui)}
+.card__by div span{display:block;font:400 13px/18px var(--font-ui);color:var(--text-3)}
+.card__by .btn{margin-left:auto}
+
+/* ---------- Code block ---------- */
+.code{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;color:var(--code-text);min-width:0}
+.code__bar{display:flex;align-items:center;justify-content:space-between;gap:var(--s-2);height:48px;padding:0 var(--s-1) 0 var(--s-2);border-bottom:1px solid var(--border)}
+.code__file{display:flex;align-items:center;gap:var(--s-2);min-width:0;font:500 13px/18px var(--font-mono);color:var(--text-3)}
+.code__file span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.code__pre{counter-reset:ln;margin:0;padding:var(--s-2) 0;overflow-x:auto;font:400 14px/24px var(--font-mono);tab-size:2}
+.code__pre code{display:block;min-width:max-content;font:inherit}
+.line{display:block;padding-right:var(--s-2);white-space:pre;counter-increment:ln;min-height:24px}
+.line::before{content:counter(ln);display:inline-block;width:32px;margin:0 var(--s-2);text-align:right;color:var(--text-4);user-select:none}
+.line--hl{background:var(--accent-tint);box-shadow:inset 2px 0 0 var(--accent-text)}
+.k{color:var(--c-kw)}.s{color:var(--c-str)}.f{color:var(--c-fn)}.t{color:var(--c-ty)}.c{color:var(--c-cm);font-style:italic}.n{color:var(--c-num)}.p{color:var(--c-pn)}
+
+/* ---------- Callout ---------- */
+.callout{display:flex;gap:var(--s-2);padding:var(--s-2) var(--s-3);border:1px solid var(--info-line);border-radius:var(--r-md);background:var(--info-bg);font:400 16px/24px var(--font-ui);color:var(--text-2)}
+.callout .ic{margin-top:var(--s-0);color:var(--info-ic)}
+.callout b{display:block;color:var(--text);font-weight:600}
+.callout--warn{border-color:var(--warn-line);background:var(--warn-bg)}
+.callout--warn .ic{color:var(--warn-ic)}
+.callout code{font:500 14px/24px var(--font-mono);color:var(--text)}
+
+/* ==========================================================
+   PAGE SECTIONS
+   ========================================================== */
+.hdr{position:sticky;top:0;z-index:5;height:64px;background:var(--bg);border-bottom:1px solid var(--border)}
+.hdr__in{display:flex;align-items:center;justify-content:space-between;gap:var(--s-3);height:100%}
+.hdr__l{display:flex;align-items:center;gap:var(--s-4)}
+.hdr__r{display:flex;align-items:center;gap:var(--s-1)}
+.logo{display:inline-flex;align-items:center;font:700 16px/24px var(--font-mono);letter-spacing:-.03em;color:var(--text)}
+.logo__m{color:var(--accent-text);margin-right:var(--s-0)}
+.nav{display:flex;align-items:center;gap:var(--s-1)}
+.nav a{position:relative;display:inline-flex;align-items:center;height:40px;padding:0 var(--s-2);border-radius:var(--r-md);font:600 14px/24px var(--font-ui);color:var(--text-3);transition:color .15s,background-color .15s}
+.nav a:hover{color:var(--text);background:var(--surface-2)}
+.nav a[aria-current="page"]{color:var(--text)}
+.nav a[aria-current="page"]::after{content:"";position:absolute;left:var(--s-2);right:var(--s-2);bottom:-12px;height:2px;border-radius:2px 2px 0 0;background:var(--accent-text)}
+.nav a:focus-visible{outline:2px solid var(--accent-text);outline-offset:2px}
+.hdr__menu{display:none}
+.mnav{display:none;border-bottom:1px solid var(--border);background:var(--surface)}
+.mnav a{display:flex;align-items:center;height:48px;padding:0 var(--s-2);font:600 16px/24px var(--font-ui);color:var(--text-2);border-top:1px solid var(--border)}
+.mnav a:first-child{border-top:0}
+.mnav a[aria-current="page"]{color:var(--accent-text)}
+
+.hero{padding:var(--s-8) 0;border-bottom:1px solid var(--border)}
+.hero__grid{align-items:center}
+.hero__copy{display:flex;flex-direction:column;align-items:flex-start;gap:var(--s-3)}
+.hero__lead{max-width:560px;color:var(--text-2)}
+.hero__links{display:flex;flex-wrap:wrap;gap:var(--s-1)}
+.signup{display:flex;flex-direction:column;gap:var(--s-1);width:100%;max-width:520px}
+.signup__row{display:flex;gap:var(--s-1)}
+.signup__row .field{flex:1;min-width:0}
+.signup__note{color:var(--text-3)}
+.signup__note.is-done{color:var(--accent-text)}
+
+.sec{padding-top:var(--s-6)}
+.sec-head{display:flex;align-items:baseline;justify-content:space-between;gap:var(--s-2);margin-bottom:var(--s-3)}
+.sec-head .t-meta{color:var(--text-3)}
+.filters{align-items:center}
+.pills{display:flex;flex-wrap:wrap;gap:var(--s-1)}
+.feature{margin-top:var(--s-4)}
+.posts{margin-top:var(--s-3);row-gap:var(--s-3)}
+.pager{display:flex;align-items:center;justify-content:space-between;gap:var(--s-2);margin-top:var(--s-4)}
+.pager .t-meta{color:var(--text-3)}
+.pager__b{display:flex;gap:var(--s-1)}
+
+.ftr{margin-top:var(--s-8);padding:var(--s-6) 0 var(--s-4);border-top:1px solid var(--border);background:var(--bg)}
+.ftr__brand{display:flex;flex-direction:column;align-items:flex-start;gap:var(--s-2)}
+.ftr__brand p{color:var(--text-3);max-width:360px}
+.ftr__soc{display:flex;gap:var(--s-1);margin-left:calc(-1 * var(--s-1))}
+.ftr__cols{display:contents}
+.ftr__col{display:flex;flex-direction:column;gap:var(--s-1)}
+.ftr__col h3{font:600 14px/24px var(--font-ui);color:var(--text);margin-bottom:var(--s-1)}
+.ftr__col a{font:400 14px/24px var(--font-ui);color:var(--text-3);width:fit-content;transition:color .15s}
+.ftr__col a:hover{color:var(--accent-text)}
+.ftr__bar{display:flex;align-items:center;justify-content:space-between;gap:var(--s-2);margin-top:var(--s-6);padding-top:var(--s-3);border-top:1px solid var(--border);color:var(--text-3)}
+
+/* ---------- Article ---------- */
+.art__head{display:flex;flex-direction:column;align-items:flex-start;gap:var(--s-3);padding:var(--s-6) 0 var(--s-4)}
+.crumbs{display:flex;align-items:center;flex-wrap:wrap;gap:var(--s-1);font:500 14px/24px var(--font-ui);color:var(--text-3)}
+.crumbs a{transition:color .15s}
+.crumbs a:hover{color:var(--accent-text)}
+.crumbs [aria-current]{color:var(--text)}
+.art__meta{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s-1) var(--s-3)}
+.art__meta .card__tags{margin-right:var(--s-1)}
+.meta-row{display:flex;flex-wrap:wrap;gap:var(--s-1) var(--s-3);font:500 13px/18px var(--font-mono);color:var(--text-3)}
+.author{display:flex;align-items:center;gap:var(--s-2);width:100%;padding:var(--s-2) 0;border-block:1px solid var(--border)}
+.author div b{display:block;font:600 16px/24px var(--font-ui)}
+.author div span{display:block;font:400 13px/18px var(--font-ui);color:var(--text-3)}
+.author__act{display:flex;gap:var(--s-1);margin-left:auto}
+.art__grid{padding-bottom:var(--s-2)}
+.prose{font:400 18px/32px var(--font-ui);color:var(--text-2);min-width:0}
+.prose > *{max-width:680px}
+.prose > .wide{max-width:none}
+.prose > * + *{margin-top:var(--s-3)}
+.prose h2{font:700 32px/40px var(--font-ui);letter-spacing:-.015em;color:var(--text);margin-top:var(--s-6)}
+.prose h3{font:600 24px/32px var(--font-ui);letter-spacing:-.01em;color:var(--text);margin-top:var(--s-4)}
+.prose h2 + *,.prose h3 + *{margin-top:var(--s-2)}
+.prose .lead{color:var(--text);font-weight:500}
+.prose p code,.prose li code{font:500 .85em/1 var(--font-mono);color:var(--text);background:var(--surface-3);border:1px solid var(--border);border-radius:var(--r-sm);padding:0 var(--s-0)}
+.prose a{color:var(--accent-text);text-decoration:underline;text-decoration-color:var(--accent-line);text-underline-offset:4px}
+.prose blockquote{padding:var(--s-1) 0 var(--s-1) var(--s-3);border-left:2px solid var(--accent-text);color:var(--text);font:500 24px/32px var(--font-ui);letter-spacing:-.01em}
+.prose ul{list-style:none;padding:0}
+.prose ul li{position:relative;padding-left:var(--s-3)}
+.prose ul li::before{content:"";position:absolute;left:var(--s-1);top:14px;width:4px;height:4px;border-radius:var(--r-full);background:var(--accent-text)}
+.prose li + li{margin-top:var(--s-1)}
+.toc-wrap{align-self:stretch}
+.toc{position:sticky;top:96px;display:flex;flex-direction:column;gap:var(--s-2)}
+.toc__t{font:600 14px/24px var(--font-ui);color:var(--text)}
+.toc__list{display:flex;flex-direction:column;border-left:1px solid var(--border)}
+.toc__list a{display:block;margin-left:-1px;padding:var(--s-1) var(--s-2);border-left:2px solid transparent;font:500 14px/24px var(--font-ui);color:var(--text-3);transition:color .15s,border-color .15s}
+.toc__list a.is-sub{padding-left:var(--s-4);font-weight:400}
+.toc__list a:hover{color:var(--text)}
+.toc__list a[aria-current="true"]{color:var(--accent-text);border-left-color:var(--accent-text)}
+.toc__list a:focus-visible{outline:2px solid var(--accent-text);outline-offset:-2px}
+.toc__prog{display:flex;flex-direction:column;gap:var(--s-1);color:var(--text-3)}
+.toc__bar{height:4px;border-radius:var(--r-full);background:var(--surface-3);overflow:hidden}
+.toc__bar i{display:block;height:100%;width:38%;background:var(--accent-text);border-radius:var(--r-full)}
+.toc-m{display:none;width:100%;border:1px solid var(--border);border-radius:var(--r-md);background:var(--surface)}
+.toc-m summary{display:flex;align-items:center;justify-content:space-between;height:48px;padding:0 var(--s-2);font:600 14px/24px var(--font-ui);cursor:pointer}
+.toc-m[open] summary .ic{transform:rotate(180deg)}
+.toc-m .toc__list{margin:0 var(--s-2) var(--s-2)}
+
+.share{display:flex;align-items:center;justify-content:space-between;gap:var(--s-2);flex-wrap:wrap;margin-top:var(--s-6);padding-top:var(--s-3);border-top:1px solid var(--border)}
+.share__b{display:flex;flex-wrap:wrap;gap:var(--s-1)}
+.navcards{margin-top:var(--s-6)}
+.navcard{display:flex;flex-direction:column;gap:var(--s-1);padding:var(--s-3);border:1px solid var(--border);border-radius:var(--r-lg);background:var(--surface);transition:border-color .2s,background-color .2s,transform .2s,box-shadow .2s}
+.navcard:hover{border-color:var(--accent-line);background:var(--surface-2);transform:translateY(-2px);box-shadow:var(--shadow-hover)}
+.navcard:hover .t-h3{color:var(--accent-text)}
+.navcard .t-h3{transition:color .2s}
+.navcard__d{display:flex;align-items:center;gap:var(--s-1);color:var(--text-3)}
+.navcard--next{text-align:right}
+.navcard--next .navcard__d{justify-content:flex-end}
+.news{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:center;gap:var(--s-6);margin-top:var(--s-6);padding:var(--s-6);border:1px solid var(--border);border-radius:var(--r-lg);background:var(--surface)}
+.news__c{display:flex;flex-direction:column;gap:var(--s-1)}
+.news__c p{color:var(--text-3)}
+.news .signup{max-width:none}
+.news .signup__row{flex-direction:row}
+
+/* ---------- Foundations diagrams (design-scoped) ---------- */
+.tp{display:grid;grid-template-columns:200px minmax(0,1fr);gap:var(--s-3);align-items:baseline;padding:var(--s-3) 0;border-bottom:1px solid var(--border)}
+.tp:first-child{padding-top:0}
+.tp:last-child{border-bottom:0;padding-bottom:0}
+.tp__m{font:500 13px/18px var(--font-mono);color:var(--text-3)}
+.tp__m b{display:block;color:var(--text);font-weight:600}
+.sp{display:grid;grid-template-columns:96px minmax(0,1fr) minmax(0,1fr);gap:var(--s-3);align-items:center;padding:var(--s-1) 0}
+.sp__bar{height:16px;background:var(--accent);border-radius:2px}
+.sp__n{font:600 13px/18px var(--font-mono);color:var(--text)}
+.sp__u{font:400 14px/24px var(--font-ui);color:var(--text-3)}
+.gd{position:relative;height:120px;border:1px dashed var(--border-strong);border-radius:var(--r-md);background:var(--surface)}
+.gd__w{height:100%;display:grid}
+.gd__w i{display:block;background:var(--accent-tint);border-inline:1px solid var(--accent-line)}
+.gd--d .gd__w{margin:0 8.3333%;grid-template-columns:repeat(12,1fr);column-gap:2%}
+.gd--m .gd__w{margin:0 4.1026%;grid-template-columns:repeat(4,1fr);column-gap:4.4693%}
+.gd--m{max-width:390px}
+.gd__cap{margin-top:var(--s-1);font:500 13px/18px var(--font-mono);color:var(--text-3)}
+.rd{display:flex;flex-wrap:wrap;gap:var(--s-3)}
+.rd div{display:flex;flex-direction:column;gap:var(--s-1);align-items:flex-start}
+.rd i{display:block;width:96px;height:64px;background:var(--surface-2);border:1px solid var(--border-strong)}
+.rd span{font:500 13px/18px var(--font-mono);color:var(--text-3)}
+
+/* ==========================================================
+   MOBILE (390): container queries so the same markup serves
+   both artboards, exactly as media queries would in production.
+   ========================================================== */
+@container ab (max-width:1247px){
+  .wrap{padding-inline:var(--s-3)}
+}
+@container ab (max-width:720px){
+  .wrap{padding-inline:var(--s-2)}
+  .grid12{grid-template-columns:repeat(4,minmax(0,1fr));column-gap:var(--s-2);row-gap:var(--s-2)}
+  .grid12 > *{grid-column:1/-1}
+  .ab__cols{grid-template-columns:repeat(4,minmax(0,1fr));column-gap:var(--s-2)}
+  .ab__grid i:nth-child(n+5){display:none}
+  .t-h1{font-size:32px;line-height:40px}
+  .t-h2{font-size:24px;line-height:32px}
+  .t-h3{font-size:20px;line-height:28px}
+  .hdr__in{gap:var(--s-2)}
+  .nav{display:none}
+  .hdr__menu{display:inline-flex}
+  .hdr .btn--collapse{width:40px;padding:0}
+  .hdr .btn--collapse .lbl{display:none}
+  .mnav.is-open{display:block}
+  .hero{padding:var(--s-6) 0}
+  .hero__grid{align-items:start;row-gap:var(--s-4)}
+  .hero__lead{font-size:16px;line-height:24px}
+  .hero__links{width:100%}
+  .hero__links .btn{flex:1}
+  .signup__row{flex-direction:column}
+  .signup__row .field{flex:none}
+  .signup__row .btn{width:100%}
+  .sec{padding-top:var(--s-4)}
+  .filters .kbd{display:none}
+  .pills{flex-wrap:nowrap;overflow-x:auto;margin-inline:calc(-1 * var(--s-2));padding-inline:var(--s-2);scrollbar-width:none}
+  .pills::-webkit-scrollbar{display:none}
+  .card--feature{flex-direction:column}
+  .card--feature .thumb{flex:none;aspect-ratio:16/9;min-height:0;border-right:0;border-bottom:1px solid var(--border)}
+  .card--feature .card__body{padding:var(--s-3)}
+  .card--feature .card__title{font-size:24px;line-height:32px}
+  .card--feature .thumb__g{font-size:40px;line-height:48px}
+  .card__by .btn{display:none}
+  .ftr{margin-top:var(--s-6);padding:var(--s-4) 0 var(--s-3)}
+  .ftr .grid12{row-gap:var(--s-4)}
+  .ftr__cols{display:grid;grid-template-columns:1fr 1fr;gap:var(--s-3)}
+  .ftr__cols > *{grid-column:auto}
+  .ftr__bar{margin-top:var(--s-4);flex-direction:column-reverse;align-items:flex-start}
+  .art__head{padding:var(--s-4) 0 var(--s-3);gap:var(--s-2)}
+  .crumbs span.cut{display:none}
+  .author{flex-wrap:wrap}
+  .author .btn--collapse{width:32px;padding:0}
+  .author .btn--collapse .lbl{display:none}
+  .toc-wrap{display:none}
+  .toc-m{display:block}
+  .prose{font-size:16px;line-height:24px}
+  .prose h2{font-size:24px;line-height:32px;margin-top:var(--s-4)}
+  .prose h3{font-size:20px;line-height:28px;margin-top:var(--s-3)}
+  .prose blockquote{font-size:20px;line-height:28px;padding-left:var(--s-2)}
+  .prose ul li::before{top:10px}
+  .callout{padding:var(--s-2)}
+  .share{margin-top:var(--s-4)}
+  .share__b{display:grid;grid-template-columns:1fr 1fr;width:100%}
+  .navcards{margin-top:var(--s-4)}
+  .navcard--next{text-align:left}
+  .navcard--next .navcard__d{justify-content:flex-start}
+  .news{grid-template-columns:minmax(0,1fr);gap:var(--s-3);padding:var(--s-3);margin-top:var(--s-4)}
+  .news .signup__row{flex-direction:column}
+  .pager .t-meta{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{transition-duration:.01ms !important;animation:none !important}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
+<symbol id="i-rss" viewBox="0 0 24 24"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></symbol>
+<symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></symbol>
+<symbol id="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></symbol>
+<symbol id="i-github" viewBox="0 0 24 24"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path stroke="none" fill="currentColor" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></symbol>
+<symbol id="i-copy" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+<symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></symbol>
+<symbol id="i-alert" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4M12 17h.01"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+<symbol id="i-calendar" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></symbol>
+<symbol id="i-refresh" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></symbol>
+<symbol id="i-chev-r" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+<symbol id="i-chev-d" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+<symbol id="i-arr-up" viewBox="0 0 24 24"><path d="m5 12 7-7 7 7M12 19V5"/></symbol>
+<symbol id="i-arr-l" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></symbol>
+<symbol id="i-arr-r" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></symbol>
+<symbol id="i-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></symbol>
+<symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
+<symbol id="i-mail" viewBox="0 0 24 24"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></symbol>
+</defs></svg>
+
+<header class="sh-bar">
+  <div class="sh-bar__in">
+    <div class="sh-title"><b>//margin</b><span>Personal tech blog: design system and page layouts</span></div>
+    <div class="tabs" role="tablist" aria-label="Views">
+      <button class="tab" role="tab" aria-selected="true" data-tab="home">Homepage</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="article">Article</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="components">Components</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="foundations">Foundations</button>
+    </div>
+    <div class="ctl">
+      <div class="ctl__g" data-frames-only><span class="ctl__l">Viewport</span>
+        <div class="seg" role="group" aria-label="Viewport">
+          <button type="button" aria-pressed="true" data-vp="d">Desktop 1440</button>
+          <button type="button" aria-pressed="false" data-vp="m">Mobile 390</button>
+        </div>
+      </div>
+      <div class="ctl__g"><span class="ctl__l">Theme</span>
+        <div class="seg" role="group" aria-label="Design theme">
+          <button type="button" aria-pressed="true" data-mode="dark">Dark</button>
+          <button type="button" aria-pressed="false" data-mode="light">Light</button>
+        </div>
+      </div>
+      <div class="ctl__g" data-frames-only><span class="ctl__l">Zoom</span>
+        <div class="seg" role="group" aria-label="Zoom">
+          <button type="button" aria-pressed="true" data-zoom="fit">Fit</button>
+          <button type="button" aria-pressed="false" data-zoom="100">100%</button>
+        </div>
+      </div>
+      <label class="chk" data-frames-only><input type="checkbox" id="grid-toggle"> Grid overlay</label>
+    </div>
+  </div>
+</header>
+
+<!-- ======================= FOUNDATIONS ======================= -->
+<main class="panel" id="p-foundations" role="tabpanel" hidden>
+<div class="doc">
+
+  <section class="blk">
+    <h2 class="blk__h">Grid</h2>
+    <p class="blk__p">Desktop is a 12-column CSS Grid inside a 1200px container with 24px gutters, so each column is 78px. Mobile is 4 columns with 16px side margins and 16px gutters (77.5px columns). Turn on <b>Grid overlay</b> in the toolbar to see it on the page layouts.</p>
+    <div class="two">
+      <div class="tile ds">
+        <div class="gd gd--d"><div class="gd__w" data-cols="12"></div></div>
+        <p class="gd__cap">Desktop 1440: side space 120, container 1200, 12 columns, gutter 24</p>
+      </div>
+      <div class="tile ds">
+        <div class="gd gd--m"><div class="gd__w" data-cols="4"></div></div>
+        <p class="gd__cap">Mobile 390: margin 16, 4 columns, gutter 16</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="blk">
+    <h2 class="blk__h">Color</h2>
+    <p class="blk__p">Dark zinc neutrals with one accent, electric violet. Text on the background clears WCAG AA everywhere; contrast ratios below are approximate and measured against the page background. Light mode swaps the neutrals for zinc-50 to zinc-950 and darkens the accent text to #5b37f2.</p>
+    <div class="sw-grid">
+      <div class="sw"><i style="background:#09090b"></i><div><b>Background</b><code>#09090b</code><small>Page</small></div></div>
+      <div class="sw"><i style="background:#111113"></i><div><b>Surface</b><code>#111113</code><small>Cards, inputs</small></div></div>
+      <div class="sw"><i style="background:#18181b"></i><div><b>Surface raised</b><code>#18181b</code><small>Hover, tags, thumbnails</small></div></div>
+      <div class="sw"><i style="background:#27272a"></i><div><b>Border</b><code>#27272a</code><small>1px hairlines</small></div></div>
+      <div class="sw"><i style="background:#3f3f46"></i><div><b>Border strong</b><code>#3f3f46</code><small>Outline buttons, fields</small></div></div>
+      <div class="sw"><i style="background:#fafafa"></i><div><b>Text</b><code>#fafafa</code><small>Headings, about 19:1</small></div></div>
+      <div class="sw"><i style="background:#d4d4d8"></i><div><b>Text secondary</b><code>#d4d4d8</code><small>Body copy, about 13:1</small></div></div>
+      <div class="sw"><i style="background:#a1a1aa"></i><div><b>Text muted</b><code>#a1a1aa</code><small>Metadata, about 7.8:1</small></div></div>
+      <div class="sw"><i style="background:#6d4aff"></i><div><b>Accent</b><code>#6d4aff</code><small>Fills. White text is about 5.1:1</small></div></div>
+      <div class="sw"><i style="background:#a794ff"></i><div><b>Accent text</b><code>#a794ff</code><small>Links, active states, about 7.9:1</small></div></div>
+      <div class="sw"><i style="background:#fbbf24"></i><div><b>Warning</b><code>#fbbf24</code><small>Warning callout only</small></div></div>
+      <div class="sw"><i style="background:linear-gradient(90deg,#b9a4ff 25%,#7ee2a8 25% 50%,#7cc4ff 50% 75%,#ffcf7d 75%)"></i><div><b>Syntax</b><code>#b9a4ff #7ee2a8 #7cc4ff #ffcf7d</code><small>Keyword, string, function, type</small></div></div>
+    </div>
+  </section>
+
+  <section class="blk">
+    <h2 class="blk__h">Typography</h2>
+    <p class="blk__p">Plus Jakarta Sans for interface and reading text, JetBrains Mono for metadata, tags and code. The scale follows the brief. Two additions cover the cases it leaves open: Label 14/24 for controls, and Prose 18/32 for the article body and hero lead, where 16/24 is too tight for long reading. Mobile steps H1, H2 and H3 down one size.</p>
+    <div class="tile ds">
+      <div class="tp"><div class="tp__m"><b>H1</b>700, 40 / 48<br>mobile 32 / 40</div><div class="t-h1">Type-safe route params in the App Router</div></div>
+      <div class="tp"><div class="tp__m"><b>H2</b>700, 32 / 40<br>mobile 24 / 32</div><div class="t-h2">Parse at the boundary</div></div>
+      <div class="tp"><div class="tp__m"><b>H3</b>600, 24 / 32<br>mobile 20 / 28</div><div class="t-h3">Wrap the parse in a helper</div></div>
+      <div class="tp"><div class="tp__m"><b>Prose</b>400, 18 / 32<br>mobile 16 / 24</div><div class="t-prose" style="color:var(--text-2);max-width:680px">Route params arrive as strings. Parse them once at the boundary and every page below it gets real types.</div></div>
+      <div class="tp"><div class="tp__m"><b>Body</b>400, 16 / 24</div><div class="t-body" style="color:var(--text-2);max-width:560px">Route params arrive as strings. Parse them once at the boundary and every page below gets real types.</div></div>
+      <div class="tp"><div class="tp__m"><b>Label</b>600, 14 / 24</div><div class="t-label">Read article</div></div>
+      <div class="tp"><div class="tp__m"><b>Caption</b>500, 13 / 18</div><div class="t-cap" style="color:var(--text-3)">One email a month. Unsubscribe anytime.</div></div>
+      <div class="tp"><div class="tp__m"><b>Meta (mono)</b>JetBrains Mono 500, 13 / 18</div><div class="t-meta" style="color:var(--text-3)">Sep 12, 2026 &nbsp; 11 min read</div></div>
+      <div class="tp"><div class="tp__m"><b>Code</b>JetBrains Mono 400, 14 / 24</div><div style="font:400 14px/24px var(--font-mono);color:var(--text-2)">const parsed = Params.safeParse(await params);</div></div>
+    </div>
+  </section>
+
+  <section class="blk">
+    <h2 class="blk__h">Spacing</h2>
+    <p class="blk__p">Base-8. Every margin, padding and gap in the layouts is one of these tokens. The 4px half-step exists only for inline-code padding and the tightest icon nudges. Bars are drawn at 200%.</p>
+    <div class="tile ds">
+      <div class="sp"><span class="sp__n">--s-0 &nbsp;4</span><span><i class="sp__bar" style="display:block;width:8px"></i></span><span class="sp__u">Inline code padding</span></div>
+      <div class="sp"><span class="sp__n">--s-1 &nbsp;8</span><span><i class="sp__bar" style="display:block;width:16px"></i></span><span class="sp__u">Icon to label, pill and tag gaps, button gaps</span></div>
+      <div class="sp"><span class="sp__n">--s-2 16</span><span><i class="sp__bar" style="display:block;width:32px"></i></span><span class="sp__u">Button and field padding, gaps inside cards</span></div>
+      <div class="sp"><span class="sp__n">--s-3 24</span><span><i class="sp__bar" style="display:block;width:48px"></i></span><span class="sp__u">Card padding, grid gutter, paragraph gap</span></div>
+      <div class="sp"><span class="sp__n">--s-4 32</span><span><i class="sp__bar" style="display:block;width:64px"></i></span><span class="sp__u">Featured card padding, gap between grid blocks</span></div>
+      <div class="sp"><span class="sp__n">--s-6 48</span><span><i class="sp__bar" style="display:block;width:96px"></i></span><span class="sp__u">Section top padding, newsletter panel padding</span></div>
+      <div class="sp"><span class="sp__n">--s-8 64</span><span><i class="sp__bar" style="display:block;width:128px"></i></span><span class="sp__u">Hero padding, footer top margin</span></div>
+    </div>
+  </section>
+
+  <section class="blk">
+    <h2 class="blk__h">Radius and elevation</h2>
+    <p class="blk__p">Radius steps with the size of the container, so a card is rounder than the button inside it. Dark surfaces show elevation with a border highlight first and a shadow second.</p>
+    <div class="tile ds">
+      <div class="rd">
+        <div><i style="border-radius:6px"></i><span>6 tags, inline code, kbd</span></div>
+        <div><i style="border-radius:8px"></i><span>8 buttons, fields, callouts</span></div>
+        <div><i style="border-radius:12px"></i><span>12 cards, code blocks, panels</span></div>
+        <div><i style="border-radius:999px"></i><span>999 pills, avatars, switch</span></div>
+        <div><i style="border-radius:12px;border-color:var(--accent-line);background:var(--surface-2);box-shadow:var(--shadow-hover)"></i><span>Hover: accent border, raised surface, 0 8 24 shadow, up 2</span></div>
+        <div><i style="border-radius:8px;outline:2px solid var(--accent-text);outline-offset:2px"></i><span>Focus: 2px accent outline, 2px offset</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="blk">
+    <h2 class="blk__h">Auto Layout to CSS</h2>
+    <p class="blk__p">Every frame is built as an Auto Layout container, so each property maps straight to Flexbox or Grid. The layouts on the Homepage and Article tabs are the working CSS.</p>
+    <table class="tbl">
+      <thead><tr><th>Auto Layout setting</th><th>CSS</th></tr></thead>
+      <tbody>
+        <tr><td>Direction: horizontal or vertical</td><td><code>display:flex; flex-direction: row | column</code></td></tr>
+        <tr><td>Gap 16</td><td><code>gap: var(--s-2)</code></td></tr>
+        <tr><td>Padding 0 / 16</td><td><code>padding: 0 var(--s-2)</code></td></tr>
+        <tr><td>Align center</td><td><code>align-items:center; justify-content:center</code></td></tr>
+        <tr><td>Space between</td><td><code>justify-content: space-between</code></td></tr>
+        <tr><td>Hug contents</td><td><code>width: fit-content</code></td></tr>
+        <tr><td>Fill container</td><td><code>flex: 1 1 0; min-width: 0</code> or a <code>1fr</code> track</td></tr>
+        <tr><td>Fixed height 40</td><td><code>height: 40px</code></td></tr>
+        <tr><td>Wrap</td><td><code>flex-wrap: wrap</code></td></tr>
+        <tr><td>Layout grid: 12 columns, gutter 24</td><td><code>grid-template-columns: repeat(12, minmax(0,1fr)); column-gap: 24px</code></td></tr>
+        <tr><td>Max width 1200, centered</td><td><code>max-width: 1200px; margin-inline: auto</code></td></tr>
+      </tbody>
+    </table>
+    <h3 class="blk__sub" style="margin-top:32px">Responsive rules</h3>
+    <table class="tbl">
+      <thead><tr><th>Container width</th><th>Behavior</th></tr></thead>
+      <tbody>
+        <tr><td>1248 and up</td><td>12 columns in a centered 1200 container. Nav is visible, feature card is horizontal, article shows the sticky TOC.</td></tr>
+        <tr><td>721 to 1247</td><td>Same grid, with 24px side padding on the container.</td></tr>
+        <tr><td>720 and down</td><td>4 columns, 16px margins. Nav collapses into a menu, feature card stacks, category pills scroll sideways, TOC becomes a disclosure above the article.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+</div>
+</main>
+
+<!-- ======================= COMPONENTS ======================= -->
+<main class="panel" id="p-components" role="tabpanel" hidden>
+<div class="doc">
+
+  <section class="blk">
+    <h2 class="blk__h">Button</h2>
+    <p class="blk__p">Three variants, five states each. Primary is the one action on a surface. Outline is for secondary actions. Ghost is for toolbars and inline actions. Disabled buttons drop to the raised surface with muted text.</p>
+    <div class="tile ds">
+      <div class="mx" id="mx-btn"></div>
+      <div class="demo" id="demo-btn" style="margin-top:32px"></div>
+      <dl class="spec">
+        <dt>Auto layout</dt><dd>Horizontal, hug width, fixed height</dd>
+        <dt>Height</dt><dd>32 small, 40 medium, 48 large</dd>
+        <dt>Padding</dt><dd>0 / 16 (large 0 / 24)</dd>
+        <dt>Gap</dt><dd>8 between icon and label</dd>
+        <dt>Radius</dt><dd>8</dd>
+        <dt>Label</dt><dd>Plus Jakarta Sans 600, 14 / 24 (small 13 / 18, large 16 / 24)</dd>
+        <dt>Hover</dt><dd>Primary darkens and adds a 4px accent halo. Outline and ghost fill with the raised surface.</dd>
+        <dt>Active</dt><dd>One step darker, moves down 1px</dd>
+        <dt>Focus</dt><dd>2px accent outline, 2px offset</dd>
+      </dl>
+    </div>
+  </section>
+
+  <section class="blk">
+    <h2 class="blk__h">Theme switch</h2>
+    <p class="blk__p">Sits in the header next to the RSS link. It also drives the Theme control in the toolbar above.</p>
+    <div class="tile ds">
+      <div class="demo" id="demo-switch"></div>
+      <dl class="spec">
+        <dt>Auto layout</dt><dd>Track 56 x 32, knob 24 with 3px inset, knob slides 24</dd>
+        <dt>Knob</dt><dd>Accent fill, moon icon in dark, sun icon in light</dd>
+      </dl>
+    </div>
+  </section>
+
+  <section class="blk">
+    <h2 class="blk__h">Tag and pill</h2>
+    <p class="blk__p">Pills are interactive category filters. Tags are static labels on cards and article headers. The kbd chip and language badge share the tag scale.</p>
+    <div class="tile ds">
+      <div class="demo" id="demo-pill"></div>
+      <dl class="spec">
+        <dt>Pill</dt><dd>Horizontal, height 32, padding 0 / 16, gap 8, radius 999, label 14 / 24 500, count in mono 13 / 18</dd>
+        <dt>Pill active</dt><dd>Accent text, accent border, accent tint fill</dd>
+        <dt>Tag</dt><dd>Horizontal, height 24, padding 0 / 8, radius 6, JetBrains Mono 500, 13 / 18</dd>
+      </dl>
+    </div>
+  </section>
+
+  <section class="blk">
+    <h2 class="blk__h">Search field</h2>
+    <p class="blk__p">Press <span class="kbd" style="display:inline-flex;font:500 13px/18px var(--font-mono);color:var(--sh-muted);border:1px solid var(--sh-line);border-radius:6px;padding:0 8px;height:24px;align-items:center">Ctrl K</span> or <span class="kbd" style="display:inline-flex;font:500 13px/18px var(--font-mono);color:var(--sh-muted);border:1px solid var(--sh-line);border-radius:6px;padding:0 8px;height:24px;align-items:center">⌘K</span> on the page layouts to focus it. The shortcut chip hides on mobile.</p>
+    <div class="tile ds">
+      <div class="demo" id="demo-field"></div>
+      <dl class="spec">
+        <dt>Auto layout</dt><dd>Horizontal, fill width, fixed height 48, padding 0 / 16, gap 8, radius 8</dd>
+        <dt>Focus</dt><dd>Accent border and a 4px accent tint halo</dd>
+      </dl>
+    </div>
+  </section>
+
+  <section class="blk">
+    <h2 class="blk__h">Post card</h2>
+    <p class="blk__p">Default and hover. Hover adds an accent border, the raised surface, a 2px lift and a soft shadow, and turns the title to the accent text color. The feature card on the homepage is the same component in a horizontal layout.</p>
+    <div class="tile ds">
+      <div class="two" id="demo-card"></div>
+      <dl class="spec">
+        <dt>Auto layout</dt><dd>Vertical, fill width, thumbnail on top (16:9), body below</dd>
+        <dt>Body</dt><dd>Vertical, padding 24, gap 16: tags, title and excerpt (gap 8), then meta row</dd>
+        <dt>Meta row</dt><dd>Horizontal, space between, 16 above with a 1px top border, pinned to the bottom</dd>
+        <dt>Radius</dt><dd>12, thumbnail is clipped by the card</dd>
+        <dt>Type</dt><dd>Title H3 600 24 / 32, excerpt Body 16 / 24 muted, meta mono 13 / 18</dd>
+      </dl>
+    </div>
+  </section>
+
+  <section class="blk">
+    <h2 class="blk__h">Code block</h2>
+    <p class="blk__p">A 48px top bar with the file name, language badge and Copy button. Line numbers sit in a 64px gutter. One or more lines can be highlighted. Copy changes to Copied for two seconds. Try it below.</p>
+    <div class="tile ds">
+      <div class="two" id="demo-code"></div>
+      <dl class="spec">
+        <dt>Auto layout</dt><dd>Vertical, fill width: top bar, then scrolling code area</dd>
+        <dt>Top bar</dt><dd>Horizontal, space between, height 48, padding 0 / 16, 1px bottom border</dd>
+        <dt>Code area</dt><dd>Padding 16 / 0, JetBrains Mono 400, 14 / 24, gutter 16 + 32 + 16</dd>
+        <dt>Highlight</dt><dd>Accent tint fill with a 2px accent bar on the left edge</dd>
+        <dt>Container</dt><dd>Radius 12, 1px border #27272a, background #0c0c0f</dd>
+      </dl>
+    </div>
+  </section>
+
+  <section class="blk">
+    <h2 class="blk__h">Callout</h2>
+    <p class="blk__p">Info uses the accent. Warning uses amber, the only color outside the neutral and violet palette.</p>
+    <div class="tile ds">
+      <div class="two" id="demo-callout"></div>
+      <dl class="spec">
+        <dt>Auto layout</dt><dd>Horizontal, gap 16, padding 16 / 24, radius 8, 1px border</dd>
+        <dt>Text</dt><dd>Title 600, body 16 / 24</dd>
+      </dl>
+    </div>
+  </section>
+
+</div>
+</main>
+
+<!-- ======================= PAGE LAYOUTS ======================= -->
+<main class="panel" id="p-home" role="tabpanel">
+  <div class="stage">
+    <div class="canvas" data-vp="d">
+      <p class="canvas__l">Homepage <span>Desktop 1440, 12 columns, 1200 container</span></p>
+      <div class="frame" data-page="home" data-w="1440"></div>
+    </div>
+    <div class="canvas" data-vp="m" hidden>
+      <p class="canvas__l">Homepage <span>Mobile 390, 4 columns, 16 margins</span></p>
+      <div class="frame" data-page="home" data-w="390"></div>
+    </div>
+  </div>
+</main>
+
+<main class="panel" id="p-article" role="tabpanel" hidden>
+  <div class="stage">
+    <div class="canvas" data-vp="d">
+      <p class="canvas__l">Article <span>Desktop 1440, prose 8 columns, sticky TOC 3 columns</span></p>
+      <div class="frame" data-page="article" data-w="1440"></div>
+    </div>
+    <div class="canvas" data-vp="m" hidden>
+      <p class="canvas__l">Article <span>Mobile 390, TOC becomes a disclosure</span></p>
+      <div class="frame" data-page="article" data-w="390"></div>
+    </div>
+  </div>
+</main>
+
+<!-- ======================= TEMPLATES ======================= -->
+<template id="tpl-header">
+<header class="hdr">
+  <div class="wrap hdr__in">
+    <div class="hdr__l">
+      <a class="logo" href="#" aria-label="margin, home"><span class="logo__m">//</span>margin</a>
+      <nav class="nav" aria-label="Primary">
+        <a href="#" aria-current="page">Articles</a>
+        <a href="#">Projects</a>
+        <a href="#">About</a>
+        <a href="#">Uses</a>
+      </nav>
+    </div>
+    <div class="hdr__r">
+      <a class="btn btn--ghost btn--collapse" href="#" aria-label="RSS feed"><svg class="ic"><use href="#i-rss"/></svg><span class="lbl">RSS</span></a>
+      <button class="switch" type="button" role="switch" aria-checked="true" aria-label="Dark theme" data-theme-toggle><span class="switch__knob"><svg class="ic i-moon"><use href="#i-moon"/></svg><svg class="ic i-sun"><use href="#i-sun"/></svg></span></button>
+      <button class="btn btn--ghost btn--icon hdr__menu" type="button" aria-label="Open menu" data-menu><svg class="ic ic--20"><use href="#i-menu"/></svg></button>
+    </div>
+  </div>
+</header>
+<nav class="mnav" aria-label="Mobile" data-mnav>
+  <a href="#" aria-current="page">Articles</a>
+  <a href="#">Projects</a>
+  <a href="#">About</a>
+  <a href="#">Uses</a>
+</nav>
+</template>
+
+<template id="tpl-footer">
+<footer class="ftr">
+  <div class="wrap">
+    <div class="grid12">
+      <div class="c-5 ftr__brand">
+        <a class="logo" href="#"><span class="logo__m">//</span>margin</a>
+        <p class="t-body">Notes on TypeScript, Next.js and the architecture behind them.</p>
+        <div class="ftr__soc">
+          <a class="btn btn--ghost btn--icon" href="#" aria-label="GitHub"><svg class="ic ic--20"><use href="#i-github"/></svg></a>
+          <a class="btn btn--ghost btn--icon" href="#" aria-label="X"><svg class="ic ic--20"><use href="#i-x"/></svg></a>
+          <a class="btn btn--ghost btn--icon" href="#" aria-label="RSS feed"><svg class="ic ic--20"><use href="#i-rss"/></svg></a>
+        </div>
+      </div>
+      <div class="ftr__cols">
+        <nav class="at-7 ftr__col" aria-label="Sitemap">
+          <h3>Sitemap</h3>
+          <a href="#">Articles</a><a href="#">Projects</a><a href="#">About</a><a href="#">Uses</a>
+        </nav>
+        <nav class="at-10 ftr__col" aria-label="Elsewhere">
+          <h3>Elsewhere</h3>
+          <a href="#">GitHub</a><a href="#">X</a><a href="#">RSS feed</a><a href="#">Email</a>
+        </nav>
+      </div>
+    </div>
+    <div class="ftr__bar">
+      <span class="t-cap">© 2026 Sam Okafor. All rights reserved.</span>
+      <button class="btn btn--outline btn--sm" type="button" data-top><svg class="ic"><use href="#i-arr-up"/></svg>Back to top</button>
+    </div>
+  </div>
+</footer>
+</template>
+
+<template id="tpl-home">
+<section class="hero">
+  <div class="wrap grid12 hero__grid">
+    <div class="c-7 hero__copy">
+      <h1 class="t-h1">I'm Sam. I build for the web and write down what I learn.</h1>
+      <p class="hero__lead t-prose">Full-stack developer. These are notes on React, Next.js and the architecture decisions behind production apps, published as I go.</p>
+      <div class="hero__links">
+        <a class="btn btn--outline" href="#"><svg class="ic"><use href="#i-github"/></svg>GitHub</a>
+        <a class="btn btn--outline" href="#"><svg class="ic"><use href="#i-x"/></svg>X</a>
+      </div>
+      <form class="signup" data-signup>
+        <span class="t-label">Get new posts by email</span>
+        <div class="signup__row">
+          <label class="field"><svg class="ic ic--20"><use href="#i-mail"/></svg><input type="email" placeholder="you@example.com" aria-label="Email address" required></label>
+          <button class="btn btn--primary btn--lg" type="submit">Subscribe</button>
+        </div>
+        <p class="signup__note t-cap" data-note>One email a month. Unsubscribe anytime.</p>
+      </form>
+    </div>
+    <div class="c-5" data-slot="now"></div>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="wrap">
+    <div class="sec-head"><h2 class="t-h2">Latest articles</h2><span class="t-meta">42 posts</span></div>
+    <div class="grid12 filters">
+      <label class="field c-4"><svg class="ic ic--20"><use href="#i-search"/></svg><input type="search" placeholder="Search articles" aria-label="Search articles" data-search><span class="kbd">⌘K</span></label>
+      <div class="pills c-8" role="group" aria-label="Filter by category">
+        <button class="pill" type="button" aria-pressed="true" data-pill>All <span class="pill__n">42</span></button>
+        <button class="pill" type="button" aria-pressed="false" data-pill>TypeScript <span class="pill__n">12</span></button>
+        <button class="pill" type="button" aria-pressed="false" data-pill>Next.js <span class="pill__n">9</span></button>
+        <button class="pill" type="button" aria-pressed="false" data-pill>CSS Architecture <span class="pill__n">8</span></button>
+        <button class="pill" type="button" aria-pressed="false" data-pill>Architecture <span class="pill__n">7</span></button>
+      </div>
+    </div>
+    <div class="feature" data-slot="feature"></div>
+    <div class="grid12 posts" data-slot="posts"></div>
+    <div class="pager">
+      <button class="btn btn--outline" type="button" disabled><svg class="ic"><use href="#i-arr-l"/></svg>Newer</button>
+      <span class="t-meta">Page 1 of 7</span>
+      <button class="btn btn--outline" type="button">Older<svg class="ic"><use href="#i-arr-r"/></svg></button>
+    </div>
+  </div>
+</section>
+</template>
+
+<template id="tpl-article">
+<div class="wrap grid12">
+  <header class="c-9 art__head">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="#">Articles</a><svg class="ic"><use href="#i-chev-r"/></svg><a href="#">Next.js</a><svg class="ic"><use href="#i-chev-r"/></svg><span aria-current="page">Type-safe route params</span>
+    </nav>
+    <div class="art__meta">
+      <div class="card__tags"><span class="tag">Next.js</span><span class="tag">TypeScript</span></div>
+      <div class="meta-row">
+        <span class="meta"><svg class="ic"><use href="#i-calendar"/></svg>Published <time datetime="2026-09-12">Sep 12, 2026</time></span>
+        <span class="meta"><svg class="ic"><use href="#i-refresh"/></svg>Updated <time datetime="2026-09-18">Sep 18, 2026</time></span>
+        <span class="meta"><svg class="ic"><use href="#i-clock"/></svg>11 min read</span>
+      </div>
+    </div>
+    <h1 class="t-h1">Type-safe route params in the App Router</h1>
+    <div class="author">
+      <span class="avatar avatar--48" aria-hidden="true">SO</span>
+      <div><b>Sam Okafor</b><span>Full-stack developer</span></div>
+      <div class="author__act">
+        <a class="btn btn--outline btn--sm btn--collapse" href="#" aria-label="Follow on X"><svg class="ic"><use href="#i-x"/></svg><span class="lbl">Follow</span></a>
+        <a class="btn btn--ghost btn--sm btn--icon" href="#" aria-label="GitHub"><svg class="ic"><use href="#i-github"/></svg></a>
+      </div>
+    </div>
+  </header>
+</div>
+
+<div class="wrap grid12 art__grid">
+  <details class="toc-m">
+    <summary>On this page<svg class="ic"><use href="#i-chev-d"/></svg></summary>
+    <div data-slot="toc-list"></div>
+  </details>
+
+  <article class="c-8 prose">
+    <p class="lead">In the App Router, every dynamic segment reaches your page as a string. That is honest, and it is also how bugs get in: a typo in the URL becomes a database query, and a page number becomes <code>"12abc"</code>. Here is the small pattern I use to turn params into real types in one place.</p>
+
+    <h2 data-sec>Why params are just strings</h2>
+    <p>Next.js cannot know that <code>[id]</code> is a UUID or that <code>[page]</code> is a positive integer, so it types them as <code>string</code>. Search params are looser still. If you cast them where they are used, the cast spreads through the codebase, and every one is a place where bad input can slip through.</p>
+    <blockquote><p>A route param is user input that happens to live in the URL.</p></blockquote>
+    <p>Treating it that way changes the fix: validate at the boundary, once, and pass typed values inward.</p>
+
+    <h2 data-sec>Parse at the boundary</h2>
+    <p>A schema library gives you the runtime check and the static type together. This page validates its <code>slug</code> before it touches the database:</p>
+    <div class="wide" data-slot="post-code"></div>
+    <p><code>safeParse</code> returns a result object instead of throwing, so the invalid case is an ordinary branch. <code>notFound()</code> returns <code>never</code>, which lets TypeScript narrow <code>parsed.data</code> on the lines below it.</p>
+    <div class="callout" role="note"><svg class="ic ic--20"><use href="#i-info"/></svg><div><b>Params are a promise now</b>In Next.js 15 and later, <code>params</code> is a <code>Promise</code> you await in async pages and layouts. Type the prop to match.</div></div>
+
+    <h2 data-sec>Reuse it everywhere</h2>
+    <h3 data-sec>Wrap the parse in a helper</h3>
+    <p>Once two pages need the same check, move it into a helper that takes a schema and returns the typed params, or calls <code>notFound()</code>.</p>
+    <ul>
+      <li>Keep each schema next to its route, in a <code>params.ts</code> file.</li>
+      <li>Export the inferred type with <code>z.infer</code> so components can import it.</li>
+      <li>Reuse the schema in tests to generate valid and invalid URLs.</li>
+    </ul>
+    <h3 data-sec>Search params</h3>
+    <p>Search params follow the same rule, with one extra step: decide what a missing or repeated key means, then encode that in the schema as a default or an array.</p>
+    <div class="callout callout--warn" role="note"><svg class="ic ic--20"><use href="#i-alert"/></svg><div><b>Do not trust the type alone</b>A schema only protects the code that runs it. Route handlers and server actions receive their input separately, so validate there too.</div></div>
+
+    <h2 data-sec>What this does not solve</h2>
+    <p>This checks the shape of the input, not whether the caller is allowed to see it. Authorization still belongs in your data layer, next to the query.</p>
+  </article>
+
+  <aside class="at-10 toc-wrap" aria-label="Table of contents">
+    <div class="toc">
+      <p class="toc__t">On this page</p>
+      <div data-slot="toc-list"></div>
+      <div class="toc__prog">
+        <div class="toc__bar"><i data-bar></i></div>
+        <span class="t-meta"><span data-pct>38%</span> read</span>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<div class="wrap">
+  <div class="grid12">
+    <div class="c-8">
+      <div class="share">
+        <span class="t-label">Share this post</span>
+        <div class="share__b">
+          <button class="btn btn--outline btn--sm" type="button" data-copy-link><svg class="ic"><use href="#i-link"/></svg><span class="lbl">Copy link</span></button>
+          <a class="btn btn--outline btn--sm" href="#"><svg class="ic"><use href="#i-x"/></svg>Post on X</a>
+          <a class="btn btn--outline btn--sm" href="#">LinkedIn</a>
+          <a class="btn btn--outline btn--sm" href="#"><svg class="ic"><use href="#i-mail"/></svg>Email</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid12 navcards">
+    <a class="c-6 navcard" href="#"><span class="navcard__d t-cap"><svg class="ic"><use href="#i-arr-l"/></svg>Previous article</span><span class="t-h3">Server Components as a data boundary</span></a>
+    <a class="c-6 navcard navcard--next" href="#"><span class="navcard__d t-cap">Next article<svg class="ic"><use href="#i-arr-r"/></svg></span><span class="t-h3">Designing a CSS architecture that survives a redesign</span></a>
+  </div>
+
+  <section class="news">
+    <div class="news__c">
+      <h2 class="t-h2">New posts, once a month</h2>
+      <p class="t-body">Short notes on TypeScript, Next.js and architecture, sent when there is something worth saying.</p>
+    </div>
+    <form class="signup" data-signup>
+      <div class="signup__row">
+        <label class="field"><svg class="ic ic--20"><use href="#i-mail"/></svg><input type="email" placeholder="you@example.com" aria-label="Email address" required></label>
+        <button class="btn btn--primary btn--lg" type="submit">Subscribe</button>
+      </div>
+      <p class="signup__note t-cap" data-note>Unsubscribe anytime. No tracking.</p>
+    </form>
+  </section>
+</div>
+</template>
+
+<script>
+(function(){
+'use strict';
+var $=function(s,r){return (r||document).querySelector(s)};
+var $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
+var ic=function(n,c){return '<svg class="ic '+(c||'')+'" aria-hidden="true"><use href="#i-'+n+'"/></svg>'};
+var tpl=function(id){return document.getElementById(id).content.cloneNode(true)};
+var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- syntax helpers ---------- */
+var K=function(t){return '<span class="k">'+t+'</span>'};
+var S=function(t){return '<span class="s">'+t+'</span>'};
+var F=function(t){return '<span class="f">'+t+'</span>'};
+var T=function(t){return '<span class="t">'+t+'</span>'};
+var C=function(t){return '<span class="c">'+t+'</span>'};
+var P=function(t){return '<span class="p">'+t+'</span>'};
+
+var NOW_LINES=[
+  C("// what I'm working on right now"),
+  K('export const')+' now '+P('=')+' '+P('{'),
+  '  role'+P(':')+' '+S('"Full-stack developer"')+P(','),
+  '  building'+P(':')+' '+S('"a type-safe CMS on Next.js"')+P(','),
+  '  learning'+P(':')+' '+P('[')+S('"React Compiler"')+P(', ')+S('"Postgres RLS"')+P('],'),
+  '  stack'+P(':')+' '+P('[')+S('"TypeScript"')+P(', ')+S('"Next.js"')+P(', ')+S('"Tailwind"')+P('],'),
+  '  writing'+P(':')+' '+S('"every other week"')+P(','),
+  P('}')+' '+K('as const')+P(';')
+];
+var POST_LINES=[
+  K('import')+' '+P('{ ')+'z'+P(' }')+' '+K('from')+' '+S('"zod"')+P(';'),
+  K('import')+' '+P('{ ')+'notFound'+P(' }')+' '+K('from')+' '+S('"next/navigation"')+P(';'),
+  '',
+  K('const')+' Params '+P('=')+' z'+P('.')+F('object')+P('({'),
+  '  slug'+P(':')+' z'+P('.')+F('string')+P('().')+F('regex')+P('(')+S('/^[a-z0-9-]+$/')+P('),'),
+  P('});'),
+  '',
+  K('type')+' '+T('Props')+' '+P('=')+' '+P('{ ')+'params'+P(':')+' '+T('Promise')+P('&lt;{ ')+'slug'+P(':')+' '+T('string')+P(' }&gt;')+P(' };'),
+  '',
+  K('export default async function')+' '+F('Page')+P('({ ')+'params'+P(' }:')+' '+T('Props')+P(') {'),
+  '  '+K('const')+' parsed '+P('=')+' Params'+P('.')+F('safeParse')+P('(')+K('await')+' params'+P(');'),
+  '  '+K('if')+' '+P('(!')+'parsed'+P('.')+'success'+P(')')+' '+F('notFound')+P('();'),
+  '',
+  '  '+K('const')+' post '+P('=')+' '+K('await')+' '+F('getPost')+P('(')+'parsed'+P('.')+'data'+P('.')+'slug'+P(');'),
+  '  '+K('return')+' '+P('&lt;')+T('Article')+' post'+P('={')+'post'+P('} /&gt;;'),
+  P('}')
+];
+var SAMPLE_LINES=[
+  K('type')+' '+T('Theme')+' '+P('=')+' '+S('"dark"')+' '+P('|')+' '+S('"light"')+P(';'),
+  '',
+  K('export function')+' '+F('toggle')+P('(')+'t'+P(':')+' '+T('Theme')+P('):')+' '+T('Theme')+' '+P('{'),
+  '  '+K('return')+' t '+P('===')+' '+S('"dark"')+' '+P('?')+' '+S('"light"')+' '+P(':')+' '+S('"dark"')+P(';'),
+  P('}')
+];
+
+function codeBlock(o){
+  var body=o.lines.map(function(l,i){
+    return '<span class="line'+((o.hl||[]).indexOf(i+1)>-1?' line--hl':'')+'">'+l+'</span>';
+  }).join('');
+  return '<div class="code"><div class="code__bar"><div class="code__file"><span>'+o.file+'</span><span class="lang">'+o.lang+'</span></div>'+
+    '<button class="btn btn--ghost btn--sm'+(o.copied?' is-copied':'')+'" type="button" data-copy>'+ic(o.copied?'check':'copy')+'<span class="lbl">'+(o.copied?'Copied':'Copy')+'</span></button></div>'+
+    '<pre class="code__pre" tabindex="0"><code>'+body+'</code></pre></div>';
+}
+
+/* ---------- content ---------- */
+var POSTS=[
+  {tags:['Next.js','TypeScript'],title:'Type-safe route params in the App Router',ex:'Route params arrive as strings. Parse them once at the boundary and every page below gets real types.',date:'Sep 12, 2026',iso:'2026-09-12',mins:11,g:'[slug]'},
+  {tags:['Next.js','Architecture'],title:'Server Components as a data boundary',ex:'Treat the server and client split as an architecture seam: what crosses it, and how to keep it narrow.',date:'Sep 3, 2026',iso:'2026-09-03',mins:9,g:'&lt;RSC /&gt;'},
+  {tags:['TypeScript'],title:'Discriminated unions beat boolean flags',ex:'Replace isLoading, isError and isSuccess with one union type that the compiler can check for you.',date:'Aug 27, 2026',iso:'2026-08-27',mins:6,g:'A | B'},
+  {tags:['CSS Architecture'],title:'Container queries in a design system',ex:'Where container queries beat media queries in a component library, and where they do not.',date:'Aug 14, 2026',iso:'2026-08-14',mins:8,g:'@container'},
+  {tags:['Architecture','Next.js'],title:'Ports and adapters in a Next.js app',ex:'Keep framework code at the edges so the domain logic stays testable when the framework changes.',date:'Jul 30, 2026',iso:'2026-07-30',mins:12,g:'Port&lt;T&gt;'},
+  {tags:['CSS Architecture'],title:'Naming things in a design token system',ex:'A three-tier naming scheme for design tokens that keeps a rebrand down to a handful of edits.',date:'Jul 12, 2026',iso:'2026-07-12',mins:7,g:'--color-bg'}
+];
+function card(p,extra){
+  return '<a class="card '+(extra||'')+'" href="#">'+
+    '<div class="thumb" aria-hidden="true"><span class="thumb__g">'+p.g+'</span><span class="thumb__l">1200 x 675</span></div>'+
+    '<div class="card__body">'+
+      '<div class="card__tags">'+p.tags.map(function(t){return '<span class="tag">'+t+'</span>'}).join('')+'</div>'+
+      '<div class="card__tx"><h3 class="card__title">'+p.title+'</h3><p class="card__ex">'+p.ex+'</p></div>'+
+      '<div class="card__meta"><span class="meta">'+ic('calendar')+'<time datetime="'+p.iso+'">'+p.date+'</time></span><span class="meta">'+ic('clock')+p.mins+' min read</span></div>'+
+    '</div></a>';
+}
+function featured(){
+  return '<a class="card card--feature" href="#">'+
+    '<div class="thumb" aria-hidden="true"><span class="thumb__g">@layer</span><span class="thumb__l">1200 x 675</span></div>'+
+    '<div class="card__body">'+
+      '<div class="card__tags"><span class="tag tag--active">Featured</span><span class="tag">CSS Architecture</span><span class="tag">Architecture</span></div>'+
+      '<div class="meta-row"><span class="meta">'+ic('calendar')+'<time datetime="2026-09-18">Sep 18, 2026</time></span><span class="meta">'+ic('clock')+'14 min read</span></div>'+
+      '<div class="card__tx"><h2 class="card__title">Designing a CSS architecture that survives a redesign</h2>'+
+      '<p class="card__ex">Tokens, cascade layers and one naming rule: how a 200-component app can take a full rebrand without touching a single component file.</p></div>'+
+      '<div class="card__by"><span class="avatar" aria-hidden="true">SO</span><div><b>Sam Okafor</b><span>Full-stack developer</span></div>'+
+      '<span class="btn btn--outline btn--sm">Read article'+ic('arr-r')+'</span></div>'+
+    '</div></a>';
+}
+var TOC=[['Why params are just strings',12,0],['Parse at the boundary',38,0],['Reuse it everywhere',60,0],['Wrap the parse in a helper',72,1],['Search params',84,1],['What this does not solve',96,0]];
+function tocList(active){
+  return '<ol class="toc__list" data-toc>'+TOC.map(function(r,i){
+    return '<li><a href="#" class="'+(r[2]?'is-sub':'')+'" data-p="'+r[1]+'"'+(i===active?' aria-current="true"':'')+'>'+r[0]+'</a></li>';
+  }).join('')+'</ol>';
+}
+
+/* ---------- state ---------- */
+var MODE='dark', VP='d', ZOOM='fit', TAB='home';
+
+/* ---------- artboards ---------- */
+function gridOverlay(){
+  return '<div class="ab__grid" aria-hidden="true"><div class="wrap"><div class="ab__cols">'+new Array(13).join('<i></i>')+'</div></div></div>';
+}
+function buildFrame(frame){
+  var w=+frame.dataset.w, page=frame.dataset.page;
+  var ab=document.createElement('div');
+  ab.className='ab ds '+(w===1440?'ab--d':'ab--m');
+  ab.dataset.mode=MODE;
+  ab.appendChild(tpl('tpl-header'));
+  var main=document.createElement('main');
+  main.appendChild(tpl(page==='home'?'tpl-home':'tpl-article'));
+  ab.appendChild(main);
+  ab.appendChild(tpl('tpl-footer'));
+  ab.insertAdjacentHTML('beforeend',gridOverlay());
+  frame.appendChild(ab);
+
+  var slot=function(n){return $$('[data-slot="'+n+'"]',ab)};
+  slot('now').forEach(function(el){el.innerHTML=codeBlock({file:'now.ts',lang:'TS',lines:NOW_LINES,hl:[4]})});
+  slot('feature').forEach(function(el){el.innerHTML=featured()});
+  slot('posts').forEach(function(el){el.innerHTML=POSTS.map(function(p){return card(p,'c-4')}).join('')});
+  slot('post-code').forEach(function(el){el.innerHTML=codeBlock({file:'app/blog/[slug]/page.tsx',lang:'TSX',lines:POST_LINES,hl:[11,12]})});
+  slot('toc-list').forEach(function(el){el.innerHTML=tocList(1)});
+  $$('[data-note]',ab).forEach(function(n){n.setAttribute('aria-live','polite')});
+
+  if(window.ResizeObserver){ new ResizeObserver(function(){fitFrame(frame)}).observe(ab); }
+}
+function fitFrame(frame){
+  var ab=frame.firstElementChild, canvas=frame.parentElement;
+  if(!ab||canvas.hidden||!canvas.offsetParent) return;
+  var w=+frame.dataset.w;
+  var avail=canvas.clientWidth-48-2;
+  var s=ZOOM==='fit'?Math.min(1,avail/w):1;
+  ab.style.transform=s===1?'':'scale('+s+')';
+  frame.style.width=Math.round(w*s+2)+'px';
+  frame.style.height=Math.round(ab.offsetHeight*s+2)+'px';
+}
+function fitAll(){ $$('.frame').forEach(fitFrame); }
+
+/* ---------- theme, viewport, zoom, tabs ---------- */
+function setMode(m){
+  MODE=m;
+  $$('.ds').forEach(function(el){el.dataset.mode=m});
+  $$('[data-mode]',$('.ctl')).forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.mode===m))});
+  $$('[data-theme-toggle]').forEach(function(s){
+    s.setAttribute('aria-checked',String(m==='dark'));
+    s.setAttribute('aria-label',m==='dark'?'Dark theme':'Light theme');
+  });
+}
+function setVp(v){
+  VP=v;
+  $$('.ctl [data-vp]').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.vp===v))});
+  $$('.canvas').forEach(function(c){c.hidden=c.dataset.vp!==v});
+  requestAnimationFrame(fitAll);
+}
+function setZoom(z){
+  ZOOM=z;
+  $$('.ctl [data-zoom]').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.zoom===z))});
+  requestAnimationFrame(fitAll);
+}
+function setTab(t){
+  TAB=t;
+  $$('.tab').forEach(function(b){b.setAttribute('aria-selected',String(b.dataset.tab===t))});
+  ['home','article','components','foundations'].forEach(function(n){$('#p-'+n).hidden=n!==t});
+  var frames=t==='home'||t==='article';
+  $$('[data-frames-only]').forEach(function(el){el.hidden=!frames});
+  if(frames) requestAnimationFrame(fitAll);
+}
+
+/* ---------- components sheet ---------- */
+function buildComponents(){
+  var states=[['Default',''],['Hover','is-hover'],['Active','is-active'],['Focus','is-focus'],['Disabled','is-disabled']];
+  var rows=[['Primary','primary','Subscribe'],['Outline','outline','Read article'],['Ghost','ghost','Copy link']];
+  var h='<span></span>'+states.map(function(s){return '<span class="mx__h">'+s[0]+'</span>'}).join('');
+  rows.forEach(function(r){
+    h+='<span class="mx__r">'+r[0]+'</span>'+states.map(function(s){
+      return '<button class="btn btn--'+r[1]+' '+s[1]+'" type="button"'+(s[1]==='is-disabled'?' disabled':'')+'>'+r[2]+'</button>';
+    }).join('');
+  });
+  $('#mx-btn').innerHTML=h;
+
+  var item=function(inner,cap){return '<div class="demo__i">'+inner+'<span class="demo__c">'+cap+'</span></div>'};
+  $('#demo-btn').innerHTML=
+    item('<button class="btn btn--primary btn--sm" type="button">Subscribe</button>','Small, 32')+
+    item('<button class="btn btn--primary" type="button">Subscribe</button>','Medium, 40')+
+    item('<button class="btn btn--primary btn--lg" type="button">Subscribe</button>','Large, 48')+
+    item('<button class="btn btn--outline" type="button">'+ic('github')+'GitHub</button>','With icon')+
+    item('<button class="btn btn--ghost btn--icon" type="button" aria-label="Copy">'+ic('copy','ic--20')+'</button>','Icon only, 40')+
+    item('<button class="btn btn--outline btn--sm" type="button">'+ic('arr-up')+'Back to top</button>','Small with icon');
+
+  var sw=function(on,attrs,label){
+    return '<button class="switch" type="button" role="switch" aria-checked="'+on+'" '+attrs+'><span class="switch__knob">'+ic('moon','i-moon')+ic('sun','i-sun')+'</span></button>';
+  };
+  $('#demo-switch').innerHTML=
+    item(sw(true,'aria-label="Dark, on" tabindex="-1"'),'On, dark')+
+    item(sw(false,'aria-label="Light, off" tabindex="-1"'),'Off, light')+
+    item(sw(true,'aria-label="Dark theme" data-theme-toggle'),'Live, click to switch the theme');
+
+  $('#demo-pill').innerHTML=
+    item('<button class="pill" type="button">TypeScript <span class="pill__n">12</span></button>','Pill, inactive')+
+    item('<button class="pill is-hover" type="button">TypeScript <span class="pill__n">12</span></button>','Pill, hover')+
+    item('<button class="pill" type="button" aria-pressed="true">TypeScript <span class="pill__n">12</span></button>','Pill, active')+
+    item('<button class="pill is-focus" type="button">TypeScript <span class="pill__n">12</span></button>','Pill, focus')+
+    item('<span class="tag">Next.js</span>','Tag, default')+
+    item('<span class="tag tag--active">Featured</span>','Tag, active')+
+    item('<span class="lang">TSX</span>','Language badge')+
+    item('<span class="kbd">⌘K</span>','Shortcut chip');
+
+  $('#demo-field').innerHTML=
+    item('<label class="field" style="width:320px">'+ic('search','ic--20')+'<input type="search" placeholder="Search articles" aria-label="Search articles"><span class="kbd">⌘K</span></label>','Default')+
+    item('<label class="field is-focus" style="width:320px">'+ic('search','ic--20')+'<input type="search" placeholder="Search articles" aria-label="Search articles, focus state"><span class="kbd">⌘K</span></label>','Focus')+
+    item('<label class="field" style="width:320px">'+ic('search','ic--20')+'<input type="search" value="route params" aria-label="Search articles, filled"><span class="kbd">⌘K</span></label>','Filled');
+
+  $('#demo-card').innerHTML=
+    '<div>'+'<div style="max-width:384px">'+card(POSTS[0])+'</div><p class="demo__c" style="margin-top:8px">Default</p></div>'+
+    '<div>'+'<div style="max-width:384px">'+card(POSTS[0],'is-hover')+'</div><p class="demo__c" style="margin-top:8px">Hover</p></div>';
+
+  $('#demo-code').innerHTML=
+    '<div>'+codeBlock({file:'theme.ts',lang:'TS',lines:SAMPLE_LINES})+'<p class="demo__c" style="margin-top:8px">Default, Copy idle</p></div>'+
+    '<div>'+codeBlock({file:'theme.ts',lang:'TS',lines:SAMPLE_LINES,hl:[3,4],copied:true})+'<p class="demo__c" style="margin-top:8px">Highlighted lines, Copied</p></div>';
+
+  $('#demo-callout').innerHTML=
+    '<div class="callout" role="note">'+ic('info','ic--20')+'<div><b>Info</b>Use it for context the reader might otherwise miss, like a version change.</div></div>'+
+    '<div class="callout callout--warn" role="note">'+ic('alert','ic--20')+'<div><b>Warning</b>Use it when skipping a step can break something or lose data.</div></div>';
+
+  $$('[data-cols]').forEach(function(el){el.innerHTML=new Array(+el.dataset.cols+1).join('<i></i>')});
+}
+
+/* ---------- init ---------- */
+buildComponents();
+$$('.frame').forEach(buildFrame);
+setMode('dark'); setVp('d'); setZoom('fit'); setTab('home');
+
+/* ---------- events ---------- */
+$('.tabs').addEventListener('click',function(e){var b=e.target.closest('.tab'); if(b) setTab(b.dataset.tab)});
+$('.tabs').addEventListener('keydown',function(e){
+  if(e.key!=='ArrowRight'&&e.key!=='ArrowLeft') return;
+  var tabs=$$('.tab'), i=tabs.indexOf(document.activeElement); if(i<0) return;
+  var n=tabs[(i+(e.key==='ArrowRight'?1:tabs.length-1))%tabs.length]; n.focus(); setTab(n.dataset.tab);
+});
+$('.ctl').addEventListener('click',function(e){
+  var b=e.target.closest('button'); if(!b) return;
+  if(b.dataset.mode) setMode(b.dataset.mode);
+  if(b.dataset.vp) setVp(b.dataset.vp);
+  if(b.dataset.zoom) setZoom(b.dataset.zoom);
+});
+$('#grid-toggle').addEventListener('change',function(e){document.body.classList.toggle('show-grid',e.target.checked)});
+
+function flash(b,doneHTML,ms){
+  if(b.dataset.orig===undefined) b.dataset.orig=b.innerHTML;
+  b.innerHTML=doneHTML; b.classList.add('is-copied');
+  clearTimeout(b._t);
+  b._t=setTimeout(function(){
+    b.innerHTML=b.dataset.orig; b.classList.remove('is-copied');
+    if(b.dataset.origCopied==='1') b.classList.add('is-copied');
+  },ms);
+}
+document.addEventListener('click',function(e){
+  var t=e.target;
+  var a=t.closest('.ds a[href="#"]'); if(a) e.preventDefault();
+
+  var cp=t.closest('[data-copy]');
+  if(cp){
+    if(cp.dataset.orig===undefined) cp.dataset.origCopied=cp.classList.contains('is-copied')?'1':'0';
+    var code=cp.closest('.code'), text=$$('.line',code).map(function(l){return l.textContent}).join('\n');
+    try{ navigator.clipboard.writeText(text).catch(function(){}); }catch(err){}
+    flash(cp,ic('check')+'<span class="lbl">Copied</span>',2000);
+    return;
+  }
+  var cl=t.closest('[data-copy-link]');
+  if(cl){
+    try{ navigator.clipboard.writeText(location.href).catch(function(){}); }catch(err){}
+    flash(cl,ic('check')+'<span class="lbl">Copied</span>',2000);
+    return;
+  }
+  var th=t.closest('[data-theme-toggle]');
+  if(th){ setMode(MODE==='dark'?'light':'dark'); return; }
+
+  var mb=t.closest('[data-menu]');
+  if(mb){
+    var ab=mb.closest('.ab'), m=$('[data-mnav]',ab), open=m.classList.toggle('is-open');
+    mb.setAttribute('aria-expanded',String(open)); mb.setAttribute('aria-label',open?'Close menu':'Open menu');
+    return;
+  }
+  var pill=t.closest('[data-pill]');
+  if(pill){
+    $$('[data-pill]',pill.parentElement).forEach(function(p){p.setAttribute('aria-pressed',String(p===pill))});
+    return;
+  }
+  var tl=t.closest('.toc__list a');
+  if(tl){
+    e.preventDefault();
+    var ab2=tl.closest('.ab'), idx=$$('a',tl.closest('.toc__list')).indexOf(tl);
+    $$('.toc__list',ab2).forEach(function(l){
+      $$('a',l).forEach(function(x,i){ if(i===idx) x.setAttribute('aria-current','true'); else x.removeAttribute('aria-current'); });
+    });
+    var pct=tl.dataset.p+'%';
+    $$('[data-bar]',ab2).forEach(function(b){b.style.width=pct});
+    $$('[data-pct]',ab2).forEach(function(b){b.textContent=pct});
+    return;
+  }
+  var top=t.closest('[data-top]');
+  if(top){ var cv=top.closest('.canvas'); if(cv) cv.scrollIntoView({block:'start',behavior:reduce?'auto':'smooth'}); return; }
+});
+document.addEventListener('submit',function(e){
+  var f=e.target.closest('[data-signup]'); if(!f) return;
+  e.preventDefault();
+  var n=$('[data-note]',f); n.textContent='Thanks. Check your inbox to confirm your email.'; n.classList.add('is-done');
+});
+document.addEventListener('keydown',function(e){
+  if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){
+    var el=$$('[data-search]').filter(function(x){return x.offsetParent!==null})[0];
+    if(el){ e.preventDefault(); el.focus(); }
+  }
+});
+window.addEventListener('resize',fitAll);
+if(document.fonts&&document.fonts.ready) document.fonts.ready.then(fitAll);
+})();
+</script>
+</body>
+</html>
