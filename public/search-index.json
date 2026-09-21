@@ -19,7 +19,7 @@
       "TypeScript",
       "Architecture"
     ],
-    "publishedAt": "2026-09-21",
+    "publishedAt": "2026-09-21T00:00:00.000Z",
     "readingTime": 2,
     "cover": "/posts/popcorn/cover.png"
   },
@@ -31,7 +31,12 @@
       "Next.js",
       "Architecture",
       "React",
-      "TypeScript"
+      "TypeScript",
+      "Sanity",
+      "Sanity-io",
+      "Sanity-studio",
+      "Tailwindcss",
+      "PostHog"
     ],
     "publishedAt": "2026-09-21T00:00:00.000Z",
     "readingTime": 4,
