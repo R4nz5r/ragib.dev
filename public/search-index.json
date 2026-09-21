@@ -17,7 +17,12 @@
     "tags": [
       "Next.js",
       "TypeScript",
-      "Architecture"
+      "Architecture",
+      "Mongodb",
+      "Screen-Sharing",
+      "Socket-io",
+      "Webrtc",
+      "Watch-Party"
     ],
     "publishedAt": "2026-09-21T00:00:00.000Z",
     "readingTime": 2,
