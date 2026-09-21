@@ -5,6 +5,8 @@ import { siteConfig } from "@/site.config";
 import { Icon } from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
 
+import { FloatingBackToTop } from "@/components/floating-back-to-top";
+
 export function SiteFooter() {
   return (
     <footer className="mt-s-8 pt-s-6 pb-s-4 border-t border-border bg-bg mobile-footer">
@@ -61,15 +63,32 @@ export function SiteFooter() {
               </h3>
               {siteConfig.nav
                 .filter((item) => item.published)
-                .map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className="text-[14px] leading-[24px] text-text-3 w-fit transition-colors duration-150 hover:text-accent-text"
-                  >
-                    {item.label}
-                  </Link>
-                ))}
+                .map((item) => {
+                  const isExternal = "external" in item && Boolean(item.external);
+                  if (isExternal) {
+                    return (
+                      <a
+                        key={item.href}
+                        href={item.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-[14px] leading-[24px] text-text-3 w-fit transition-colors duration-150 hover:text-accent-text"
+                      >
+                        <span>{item.label}</span>
+                        <Icon name="external" size={16} className="text-text-4" />
+                      </a>
+                    );
+                  }
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className="text-[14px] leading-[24px] text-text-3 w-fit transition-colors duration-150 hover:text-accent-text"
+                    >
+                      {item.label}
+                    </Link>
+                  );
+                })}
             </nav>
 
             <nav className="at-10 ftr-col flex flex-col gap-s-1" aria-label="Elsewhere">
@@ -77,13 +96,26 @@ export function SiteFooter() {
                 Elsewhere
               </h3>
               <a
+                href={siteConfig.links.portfolio}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-[14px] leading-[24px] text-text-3 w-fit transition-colors duration-150 hover:text-accent-text"
+              >
+                <span>Portfolio</span>
+                <Icon name="external" size={16} className="text-text-4" />
+              </a>
+              <a
                 href={siteConfig.links.github}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="text-[14px] leading-[24px] text-text-3 w-fit transition-colors duration-150 hover:text-accent-text"
               >
                 GitHub
               </a>
               <a
                 href={siteConfig.links.x}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="text-[14px] leading-[24px] text-text-3 w-fit transition-colors duration-150 hover:text-accent-text"
               >
                 X
@@ -110,6 +142,7 @@ export function SiteFooter() {
           <BackToTopButton />
         </div>
       </div>
+      <FloatingBackToTop />
     </footer>
   );
 }
@@ -120,7 +153,7 @@ function BackToTopButton() {
       type="button"
       onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
       className={[
-        "inline-flex items-center justify-center gap-s-1",
+        "hidden md:inline-flex items-center justify-center gap-s-1",
         "h-8 px-s-2",
         "border border-border-strong rounded-r-md",
         "bg-transparent text-text",

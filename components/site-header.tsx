@@ -15,10 +15,12 @@ export function SiteHeader() {
   const publishedNav = siteConfig.nav.filter((item) => item.published);
 
   function isItemActive(href: string) {
+    if (href.startsWith("http")) return false;
     if (href === "/") {
       const isOtherNav = siteConfig.nav.some(
         (n) =>
           n.href !== "/" &&
+          !n.href.startsWith("http") &&
           (pathname === n.href || pathname.startsWith(`${n.href}/`))
       );
       return (
@@ -49,14 +51,17 @@ export function SiteHeader() {
             {/* Desktop nav — hidden on mobile */}
             <nav className="desktop-nav items-center gap-s-1" aria-label="Primary">
               {publishedNav.map((item) => {
-                const isActive = isItemActive(item.href);
+                const isExternal = "external" in item && Boolean(item.external);
+                const isActive = !isExternal && isItemActive(item.href);
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
+                    target={isExternal ? "_blank" : undefined}
+                    rel={isExternal ? "noopener noreferrer" : undefined}
                     aria-current={isActive ? "page" : undefined}
                     className={[
-                      "relative inline-flex items-center h-10 px-s-2 rounded-r-md",
+                      "relative inline-flex items-center gap-1.5 h-10 px-s-2 rounded-r-md",
                       "font-semibold text-[14px] leading-[24px]",
                       "transition-[color,background-color] duration-150",
                       "focus-visible:outline-2 focus-visible:outline-accent-text focus-visible:outline-offset-2",
@@ -65,7 +70,8 @@ export function SiteHeader() {
                         : "text-text-3 hover:text-text hover:bg-surface-2",
                     ].join(" ")}
                   >
-                    {item.label}
+                    <span>{item.label}</span>
+                    {isExternal && <Icon name="external" size={16} className="text-text-4" />}
                     {isActive && (
                       <span className="absolute left-s-2 right-s-2 -bottom-3 h-0.5 rounded-t-sm bg-accent-text" />
                     )}
@@ -109,21 +115,25 @@ export function SiteHeader() {
       {menuOpen && (
         <nav className="mobile-nav border-b border-border bg-surface" aria-label="Mobile">
           {publishedNav.map((item) => {
-            const isActive = isItemActive(item.href);
+            const isExternal = "external" in item && Boolean(item.external);
+            const isActive = !isExternal && isItemActive(item.href);
             return (
               <Link
                 key={item.href}
                 href={item.href}
+                target={isExternal ? "_blank" : undefined}
+                rel={isExternal ? "noopener noreferrer" : undefined}
                 aria-current={isActive ? "page" : undefined}
                 onClick={() => setMenuOpen(false)}
                 className={[
-                  "flex items-center h-12 px-s-2",
+                  "flex items-center justify-between h-12 px-s-2",
                   "font-semibold text-[16px] leading-[24px]",
                   "border-t border-border first:border-t-0",
                   isActive ? "text-accent-text" : "text-text-2",
                 ].join(" ")}
               >
-                {item.label}
+                <span>{item.label}</span>
+                {isExternal && <Icon name="external" size={16} className="text-text-4" />}
               </Link>
             );
           })}

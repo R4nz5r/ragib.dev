@@ -14,12 +14,16 @@ export const siteConfig = {
     x: "https://x.com/username",
     email: "mailto:hello@ragib.dev",
     rss: "/rss.xml",
+    portfolio: "https://ragibshahrier.com",
   },
   nav: [
     { label: "Articles", href: "/", published: true },
-    { label: "Projects", href: "/projects", published: false },
-    { label: "About", href: "/about", published: false },
-    { label: "Uses", href: "/uses", published: false },
+    {
+      label: "Portfolio",
+      href: "https://ragibshahrier.com",
+      published: true,
+      external: true,
+    },
   ],
   tags: [
     "TypeScript",

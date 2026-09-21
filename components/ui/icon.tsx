@@ -78,6 +78,7 @@ const icons = {
   "arr-up": <path d="m5 12 7-7 7 7M12 19V5" />,
   "arr-l": <path d="M19 12H5M12 19l-7-7 7-7" />,
   "arr-r": <path d="M5 12h14M12 5l7 7-7 7" />,
+  external: <path d="M7 17L17 7M7 7h10v10" />,
   link: (
     <>
       <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />

@@ -14,7 +14,7 @@ draft: false
 
 Most learning platforms treat video as a black box. You search for "async generators", get back a list of courses, click one, and then scrub through a two-hour video looking for the three minutes that matter to you. That friction is the problem Vertex is built to solve.
 
-The premise is simple: every search result should link not to a course page, but to the **exact second** in the lesson where the answer lives. The video plays in-place. No scrubbing.
+The premise is simple: every search result should link not to a course page, but to the **exact second** in the lesson where the answer lives. The video plays in-place with zero scrubbing. You can explore the live platform at [vertex.ragibshahrier.com](https://vertex.ragibshahrier.com/).
 
 Here is how I built it.
 
@@ -144,4 +144,4 @@ The client loads this JSON on demand and runs MiniSearch against it with topic m
 
 **Static generation plus a JSON index is good enough at this scale.** Running a search server for a platform with a few hundred lessons is overkill. A flat JSON file served from a CDN, loaded once, and queried in memory is fast, cheap, and eliminates a whole category of infrastructure decisions.
 
-The source is on [GitHub](https://github.com/R4nz5r/Vertex-learning-platform).
+The live application is available at [vertex.ragibshahrier.com](https://vertex.ragibshahrier.com/), and the complete source code is on [GitHub](https://github.com/R4nz5r/Vertex-learning-platform).

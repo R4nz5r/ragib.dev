@@ -19,6 +19,16 @@ export async function Hero() {
               <Button
                 as="a"
                 variant="outline"
+                href={siteConfig.links.portfolio}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Icon name="external" size={16} />
+                <span>Portfolio</span>
+              </Button>
+              <Button
+                as="a"
+                variant="outline"
                 href={siteConfig.links.github}
                 target="_blank"
                 rel="noopener noreferrer"

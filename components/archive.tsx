@@ -200,9 +200,7 @@ export function Archive({
         <div className="grid12 posts" data-slot="posts">
           {displayedPosts.length > 0 ? (
             displayedPosts.map((post) => (
-              <div key={post.slug} className="c-4">
-                <PostCard post={post} />
-              </div>
+              <PostCard key={post.slug} post={post} className="c-4" />
             ))
           ) : isFiltering ? (
             /* Filtered Empty State */

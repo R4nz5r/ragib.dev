@@ -268,168 +268,10 @@ button {
   }
 }
 
-/* Mobile: 4-column grid, smaller type, collapsed nav */
-@media (max-width: 720px) {
-  .wrap {
-    padding-inline: var(--s-2);
-  }
-
-  .grid12 {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    column-gap: var(--s-2);
-    row-gap: var(--s-2);
-  }
-
-  .grid12 > * {
-    grid-column: 1 / -1;
-  }
-
-  .t-h1 {
-    font-size: 32px;
-    line-height: 40px;
-  }
-
-  .t-h2 {
-    font-size: 24px;
-    line-height: 32px;
-  }
-
-  .t-h3 {
-    font-size: 20px;
-    line-height: 28px;
-  }
-
-  .t-prose {
-    font-size: 16px;
-    line-height: 24px;
-  }
-
-  /* Hero mobile overrides */
-  .hero {
-    padding: var(--s-6) 0;
-  }
-  .hero__grid {
-    align-items: start;
-    row-gap: var(--s-4);
-  }
-  .hero__lead {
-    font-size: 16px;
-    line-height: 24px;
-  }
-  .hero__links {
-    width: 100%;
-  }
-  .hero__links .btn {
-    flex: 1;
-  }
-  .signup__row {
-    flex-direction: column;
-  }
-  .signup__row .field {
-    flex: none;
-  }
-  .signup__row .btn {
-    width: 100%;
-  }
-
-  /* Archive mobile overrides */
-  .sec {
-    padding-top: var(--s-4);
-  }
-  .filters .kbd {
-    display: none;
-  }
-  .pills {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    margin-inline: calc(-1 * var(--s-2));
-    padding-inline: var(--s-2);
-    scrollbar-width: none;
-  }
-  .pills::-webkit-scrollbar {
-    display: none;
-  }
-  .card--feature {
-    flex-direction: column;
-  }
-  .card--feature .thumb {
-    flex: none;
-    aspect-ratio: 16/9;
-    min-height: 0;
-    border-right: 0;
-    border-bottom: 1px solid var(--border);
-  }
-  .card--feature .card__body {
-    padding: var(--s-3);
-  }
-  .card--feature .card__title {
-    font-size: 24px;
-    line-height: 32px;
-  }
-  .card--feature .thumb__g {
-    font-size: 40px;
-    line-height: 48px;
-  }
-  .card__by .btn {
-    display: none;
-  }
-
-  /* Article mobile overrides */
-  .art__head {
-    padding: var(--s-4) 0 var(--s-3);
-    gap: var(--s-2);
-  }
-  .crumbs span.cut {
-    display: none;
-  }
-  .author {
-    flex-wrap: wrap;
-  }
-  .author .btn--collapse {
-    width: 32px;
-    padding: 0;
-  }
-  .author .btn--collapse .lbl {
-    display: none;
-  }
-  .toc-wrap {
-    display: none;
-  }
-  .prose {
-    font-size: 16px;
-    line-height: 24px;
-  }
-  .prose h2 {
-    font-size: 24px;
-    line-height: 32px;
-    margin-top: var(--s-4);
-  }
-  .prose h3 {
-    font-size: 20px;
-    line-height: 28px;
-    margin-top: var(--s-3);
-  }
-  .prose blockquote {
-    font-size: 20px;
-    line-height: 28px;
-    padding-left: var(--s-2);
-  }
-  .prose ul li::before {
-    top: 10px;
-  }
-  .callout {
-    padding: var(--s-2);
-  }
+/* Desktop navigation: visible at ≥721px */
+.desktop-nav {
+  display: none;
 }
-
-/* ==========================================================
-   HEADER / FOOTER RESPONSIVE
-   The design uses a 720px breakpoint for nav collapse which
-   doesn't match Tailwind's default breakpoints, so we use
-   custom CSS for these layout-specific overrides.
-   ========================================================== */
-
-/* Desktop: hide hamburger and mobile nav */
 @media (min-width: 721px) {
   .hidden-desktop {
     display: none !important;
@@ -437,30 +279,6 @@ button {
   .mobile-nav {
     display: none !important;
   }
-}
-
-/* Header mobile overrides */
-@media (max-width: 720px) {
-  /* Show hamburger */
-  .hidden-desktop {
-    display: inline-flex;
-  }
-
-  /* RSS button: collapse to icon-only */
-  .rss-btn {
-    width: 40px;
-    padding: 0;
-  }
-  .rss-label {
-    display: none;
-  }
-}
-
-/* Desktop nav: visible at ≥721px */
-.desktop-nav {
-  display: none;
-}
-@media (min-width: 721px) {
   .desktop-nav {
     display: flex;
   }
@@ -594,7 +412,27 @@ button {
   outline-offset: 2px;
 }
 
-/* Pill forced states */
+/* ---------- Pills and tags ---------- */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-1);
+  flex: none;
+  flex-shrink: 0;
+  height: 32px;
+  padding: 0 var(--s-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-full);
+  background-color: transparent;
+  color: var(--text-3);
+  font-family: var(--font-ui);
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 24px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background-color 0.15s;
+}
 .pill:hover,
 .pill.is-hover {
   color: var(--text);
@@ -612,17 +450,55 @@ button {
   outline: 2px solid var(--accent-text);
   outline-offset: 2px;
 }
+.pill__n {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--text-4);
+  pointer-events: none;
+}
 .pill[aria-pressed="true"] .pill__n,
 .pill.is-active .pill__n {
   color: var(--accent-text);
   opacity: 0.8;
 }
 
-/* Tag states */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 var(--s-1);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background-color: var(--surface-2);
+  color: var(--text-3);
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 18px;
+  white-space: nowrap;
+}
 .tag--active {
   color: var(--accent-text);
   border-color: var(--accent-line);
   background-color: var(--accent-tint);
+}
+
+.kbd {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  height: 24px;
+  padding: 0 var(--s-1);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-sm);
+  background-color: var(--surface-2);
+  color: var(--text-3);
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 18px;
 }
 
 /* ---------- Field ---------- */
@@ -860,6 +736,7 @@ button {
 .card {
   display: flex;
   flex-direction: column;
+  height: 100%;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--r-lg);
@@ -996,7 +873,7 @@ button {
   color: var(--text-3);
 }
 .filters {
-  align-items: center;
+  align-items: flex-start;
 }
 .pills {
   display: flex;
@@ -1550,46 +1427,314 @@ h3[id] {
   flex-direction: row;
 }
 
-/* Footer mobile overrides */
+/* ==========================================================
+   MOBILE RESPONSIVE (max-width: 720px)
+   Consolidated at the end of the stylesheet to ensure correct
+   CSS cascade priority over all base component classes.
+   ========================================================== */
 @media (max-width: 720px) {
-  /* Article TOC & footer mobile overrides */
+  /* Layout & Grid */
+  .wrap {
+    padding-inline: var(--s-2);
+  }
+
+  .grid12 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    column-gap: var(--s-2);
+    row-gap: var(--s-2);
+  }
+
+  .grid12 > * {
+    grid-column: 1 / -1;
+  }
+
+  /* Typography Scale */
+  .t-h1 {
+    font-size: 32px;
+    line-height: 40px;
+  }
+
+  .t-h2 {
+    font-size: 24px;
+    line-height: 32px;
+  }
+
+  .t-h3 {
+    font-size: 20px;
+    line-height: 28px;
+  }
+
+  .t-prose {
+    font-size: 16px;
+    line-height: 24px;
+  }
+
+  /* Header & Navigation */
+  .hidden-desktop {
+    display: inline-flex !important;
+  }
+
+  .rss-btn {
+    width: 40px !important;
+    padding: 0 !important;
+  }
+
+  .rss-label {
+    display: none !important;
+  }
+
+  .hdr__in {
+    gap: var(--s-2);
+  }
+
+  /* Hero Section */
+  .hero {
+    padding: var(--s-6) 0;
+  }
+
+  .hero__grid {
+    align-items: start;
+    row-gap: var(--s-4);
+  }
+
+  .hero__lead {
+    font-size: 16px;
+    line-height: 24px;
+  }
+
+  .hero__links {
+    width: 100%;
+    display: flex;
+    gap: var(--s-1);
+  }
+
+  .hero__links .btn {
+    flex: 1;
+  }
+
+  /* Newsletter / Signup Form (Hero & Article Footer) — Sleek, Responsive Inline Row */
+  .signup {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .signup__row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .signup__row .field {
+    flex: 1;
+    min-width: 0;
+    height: 44px;
+    padding: 0 10px !important;
+    gap: 6px !important;
+  }
+
+  .signup__row .field .ic {
+    width: 16px !important;
+    height: 16px !important;
+  }
+
+  .signup__row .field input {
+    font-size: 14px !important;
+    line-height: 20px !important;
+  }
+
+  .signup__row .btn {
+    flex: none !important;
+    height: 44px !important;
+    padding: 0 14px !important;
+    font-size: 14px !important;
+    white-space: nowrap !important;
+  }
+
+  /* Archive Section & Filters */
+  .sec {
+    padding-top: var(--s-4);
+  }
+
+  .filters {
+    row-gap: var(--s-2);
+  }
+
+  .filters .field {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .filters .kbd {
+    display: none;
+  }
+
+  .pills {
+    grid-column: 1 / -1;
+    width: 100%;
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    margin-inline: calc(-1 * var(--s-2));
+    padding-inline: var(--s-2);
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    scroll-padding-inline: var(--s-2);
+  }
+
+  .pills::-webkit-scrollbar {
+    display: none;
+  }
+
+  .pill {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+
+  /* Featured Post Card */
+  .card--feature {
+    flex-direction: column !important;
+  }
+
+  .card--feature .thumb {
+    flex: none !important;
+    aspect-ratio: 16 / 9 !important;
+    min-height: 0 !important;
+    border-right: 0 !important;
+    border-bottom: 1px solid var(--border) !important;
+    width: 100% !important;
+  }
+
+  .card--feature .card__body {
+    padding: var(--s-3) !important;
+  }
+
+  .card--feature .card__title {
+    font-size: 24px !important;
+    line-height: 32px !important;
+  }
+
+  .card--feature .thumb__g {
+    font-size: 40px !important;
+    line-height: 48px !important;
+  }
+
+  .card__by .btn {
+    display: none !important;
+  }
+
+  /* Pagination */
+  .pager .t-meta {
+    display: none;
+  }
+
+  /* Article Page */
+  .art__head {
+    padding: var(--s-4) 0 var(--s-3);
+    gap: var(--s-2);
+  }
+
+  .crumbs span.cut {
+    display: none;
+  }
+
+  .author {
+    flex-wrap: wrap;
+  }
+
+  .author .btn--collapse {
+    width: 32px;
+    padding: 0;
+  }
+
+  .author .btn--collapse .lbl {
+    display: none;
+  }
+
   .toc-wrap {
     display: none;
   }
+
   .toc-m {
     display: block;
   }
+
+  .prose {
+    font-size: 16px;
+    line-height: 24px;
+  }
+
+  .prose h2 {
+    font-size: 24px;
+    line-height: 32px;
+    margin-top: var(--s-4);
+  }
+
+  .prose h3 {
+    font-size: 20px;
+    line-height: 28px;
+    margin-top: var(--s-3);
+  }
+
+  .prose blockquote {
+    font-size: 20px;
+    line-height: 28px;
+    padding-left: var(--s-2);
+  }
+
+  .prose ul li::before {
+    top: 10px;
+  }
+
+  .callout {
+    padding: var(--s-2);
+  }
+
   .share {
     margin-top: var(--s-4);
   }
+
   .share__b {
     display: grid;
     grid-template-columns: 1fr 1fr;
     width: 100%;
   }
+
   .navcards {
     margin-top: var(--s-4);
+    row-gap: var(--s-2);
   }
+
+  .navcards > .navcard,
+  .navcards > .navcard--next,
   .navcards > .navcard--next.at-7,
   .navcards > .navcard--next:only-child {
     grid-column: 1 / -1;
+    width: 100%;
   }
+
   .navcard--next {
     text-align: left;
   }
+
   .navcard--next .navcard__d {
     justify-content: flex-start;
   }
+
   .news {
     grid-template-columns: minmax(0, 1fr);
     gap: var(--s-3);
     padding: var(--s-3);
     margin-top: var(--s-4);
   }
+
   .news .signup__row {
-    flex-direction: column;
+    flex-direction: row;
   }
 
+  /* Footer */
   .mobile-footer {
     margin-top: var(--s-6);
     padding-top: var(--s-4);
@@ -1612,8 +1757,13 @@ h3[id] {
 
   .mobile-footer .ftr-bar {
     margin-top: var(--s-4);
-    flex-direction: column-reverse;
-    align-items: flex-start;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  .mobile-footer .ftr-bar button {
+    display: none !important;
   }
 }
 
