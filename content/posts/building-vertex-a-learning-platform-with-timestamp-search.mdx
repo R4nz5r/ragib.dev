@@ -1,13 +1,14 @@
-﻿---
-title: "Building Vertex: A Learning Platform Where Search Links to the Exact Second"
-description: "How I built Vertex — a course platform on Next.js and Sanity where a plain language search query returns ranked cards, each linking to the exact timestamp in a lesson video where that topic is taught."
-publishedAt: "2026-09-21"
+---
+title: 'Building Vertex: A Learning Platform Where Search Links to the Exact Second'
+description: 'How I built Vertex — a course platform on Next.js and Sanity where a plain language search query returns ranked cards, each linking to the exact timestamp in a lesson video where that topic is taught.'
+publishedAt: 2026-09-21T00:00:00.000Z
 tags:
   - Next.js
   - Architecture
   - React
   - TypeScript
 featured: false
+cover: /posts/vertex.jpg
 draft: false
 ---
 
@@ -48,9 +49,9 @@ The key insight is that Sanity stores lessons not as monolithic video blobs, but
 
 When a learner types a plain language query, the search runs against the segment index. Each match returns:
 
-- The segment's topic text
-- The course and lesson it belongs to
-- The **timestamp** of that segment
+* The segment's topic text
+* The course and lesson it belongs to
+* The **timestamp** of that segment
 
 The result card renders the course thumbnail, the lesson title, and a formatted timestamp badge. Clicking it navigates to the lesson page with a `?t=142` query param (or whatever the second is), and the video player seeks to that point on mount.
 
@@ -72,9 +73,7 @@ export default async function LessonPage({ searchParams }: Props) {
 }
 ```
 
-<Callout type="info" title="Why query params instead of hash fragments">
-  Hash fragments (`#t=142`) are never sent to the server, so they cannot be used for SSR or for sharing a link that works on first load. A `?t=` query param is picked up by the server, passed to the player as a prop, and the initial seek happens before the user sees the page.
-</Callout>
+<Callout type="info" title="Why query params instead of hash fragments" />
 
 ## Content Modelling in Sanity
 
