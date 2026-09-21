@@ -44,7 +44,7 @@ export async function Hero() {
                 rel="noopener noreferrer"
               >
                 <Icon name="x" size={16} />
-                <span>X</span>
+                <span>Twitter</span>
               </Button>
             </div>
             <NewsletterForm />
