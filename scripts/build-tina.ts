@@ -5,8 +5,8 @@ const hasCredentials =
   Boolean(process.env.TINA_TOKEN);
 
 const command = hasCredentials
-  ? "npx tinacms build --skip-cloud-checks"
-  : "npx tinacms build --local --skip-cloud-checks";
+  ? "npx tinacms build"
+  : "npx tinacms build --local";
 
 console.log(`[tina] Running build: ${command}`);
 execSync(command, { stdio: "inherit" });
