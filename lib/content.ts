@@ -18,23 +18,26 @@ export const PostFrontmatterSchema = z.object({
     .string()
     .min(1, "description cannot be empty"),
   publishedAt: z
-    .string()
-    .refine(
-      (val: string) => {
-        const timestamp = Date.parse(val);
-        return !isNaN(timestamp);
-      },
-      { message: "Invalid date format. Expected a valid ISO date string" }
+    .preprocess(
+      (val) => (val instanceof Date ? val.toISOString() : val),
+      z.string().refine(
+        (val: string) => {
+          const timestamp = Date.parse(val);
+          return !isNaN(timestamp);
+        },
+        { message: "Invalid date format. Expected a valid ISO date string" }
+      )
     ),
   tags: z
     .array(z.string().min(1, "Tag cannot be empty"))
     .min(1, "At least one tag is required"),
   updatedAt: z
-    .string()
-    .refine((val) => !isNaN(Date.parse(val)), {
-      message: "Invalid updatedAt date format",
-    })
-    .optional(),
+    .preprocess(
+      (val) => (val instanceof Date ? val.toISOString() : val),
+      z.string().refine((val) => !isNaN(Date.parse(val)), {
+        message: "Invalid updatedAt date format",
+      }).optional()
+    ),
   featured: z.boolean().optional(),
   cover: z
     .union([

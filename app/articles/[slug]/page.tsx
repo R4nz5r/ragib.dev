@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getAllPosts, getPostBySlug, getAdjacentPosts } from "@/lib/content";
 import { siteConfig } from "@/site.config";
@@ -56,11 +57,24 @@ export async function generateMetadata({
       modifiedTime: post.updatedAt ?? post.publishedAt,
       tags: post.tags,
       authors: [siteConfig.author.name],
+      ...(post.cover && {
+        images: [
+          {
+            url: typeof post.cover === "object" ? post.cover.src : post.cover,
+            width: 1200,
+            height: 675,
+            alt: typeof post.cover === "object" ? post.cover.alt : post.title,
+          },
+        ],
+      }),
     },
     twitter: {
-      card: "summary",
+      card: post.cover ? "summary_large_image" : "summary",
       title: post.title,
       description: post.description,
+      ...(post.cover && {
+        images: [typeof post.cover === "object" ? post.cover.src : post.cover],
+      }),
     },
   };
 }
@@ -152,6 +166,20 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
               </a>
             </div>
           </div>
+
+          {/* Cover hero image */}
+          {post.cover && (
+            <div className="art__cover">
+              <Image
+                src={typeof post.cover === "object" ? post.cover.src : post.cover}
+                alt={typeof post.cover === "object" ? post.cover.alt : post.title}
+                width={1200}
+                height={675}
+                priority
+                className="w-full h-auto rounded-lg"
+              />
+            </div>
+          )}
         </header>
       </div>
 

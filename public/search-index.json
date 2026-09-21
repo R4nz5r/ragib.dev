@@ -22,5 +22,19 @@
     "publishedAt": "2026-09-21",
     "readingTime": 1,
     "cover": "/posts/popcorn/cover.png"
+  },
+  {
+    "slug": "building-vertex-a-learning-platform-with-timestamp-search",
+    "title": "Building Vertex: A Learning Platform Where Search Links to the Exact Second",
+    "description": "How I built Vertex — a course platform on Next.js and Sanity where a plain language search query returns ranked cards, each linking to the exact timestamp in a lesson video where that topic is taught.",
+    "tags": [
+      "Next.js",
+      "Architecture",
+      "React",
+      "TypeScript"
+    ],
+    "publishedAt": "2026-09-21T00:00:00.000Z",
+    "readingTime": 4,
+    "cover": "/posts/vertex.jpg"
   }
 ]
