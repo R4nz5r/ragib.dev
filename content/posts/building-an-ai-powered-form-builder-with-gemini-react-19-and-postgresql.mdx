@@ -1,0 +1,78 @@
+---
+title: 'Building an AI-Powered Form Builder with Gemini, React 19, and PostgreSQL'
+description: |
+  How I built a full-stack form builder featuring Gemini AI prompt-to-form generation, drag-and-drop customization with @dnd-kit, and real-time response analytics.
+publishedAt: 2026-09-20T20:01:09.259Z
+tags:
+  - React
+  - TypeScript
+  - Architecture
+  - PostgreSQL
+  - AI
+featured: true
+cover: /posts/form.jpg
+---
+
+Creating forms manually is tedious: defining fields, configuring validation rules, setting up responsive layouts, and hooking up database schemas. 
+
+To streamline this workflow, I built \*\*\[AI Form Builder]\(https\://forms.ragibshahrier.com/)\*\*, a full-stack application that turns natural language prompts into complete, production-ready forms in seconds—complete with drag-and-drop customization and live response analytics.
+
+\---
+
+\## The Tech Stack
+
+\* \*\*Frontend\*\*: React 19, Vite, Tailwind CSS v4
+
+\* \*\*Drag and Drop\*\*: \`@dnd-kit/core\` & \`@dnd-kit/sortable\`
+
+\* \*\*Form Management\*\*: \`react-hook-form\` & \`sonner\` notifications
+
+\* \*\*Backend\*\*: Node.js & Express
+
+\* \*\*AI Engine\*\*: \`@google/genai\` (Google Gemini with multi-model fallback)
+
+\* \*\*Database\*\*: PostgreSQL (\`pg\`) with relational form schemas
+
+\* \*\*Authentication\*\*: JWT & \`bcryptjs\`
+
+\* \*\*Data Visualization\*\*: Recharts
+
+\---
+
+\## Core Architecture & Engineering Highlights
+
+\### 1. Resilient Prompt-to-Form Generation (Multi-Model Fallback)
+
+Public AI APIs can occasionally hit rate limits (\`429\`) or temporary service unavailability (\`503\`). To ensure forms are generated reliably without user-facing failures, the backend uses a tiered multi-model fallback system:
+
+\`\`\`javascript title="services/gemini.service.js" {5-12}
+
+// Fallback pipeline: primary flash model -> secondary pro/flash fallbacks
+
+async function callWithFallback(prompt, schema) {
+
+&#x20; const models = \["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-pro"];
+
+&#x20; for (const model of models) {
+
+&#x20;   try {
+
+&#x20;     return await generateFormSchema(model, prompt, schema);
+
+&#x20;   } catch (err) {
+
+&#x20;     if (err.status === 429 || err.status === 503) {
+
+&#x20;       console.warn(\`Model ${model} overloaded, falling back to next model...\`);
+
+&#x20;       continue;
+
+&#x20;     }
+
+&#x20;     throw err;
+
+&#x20;   }
+
+&#x20; }
+
+}
