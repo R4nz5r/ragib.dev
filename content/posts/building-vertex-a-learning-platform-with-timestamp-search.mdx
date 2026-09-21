@@ -1,0 +1,148 @@
+﻿---
+title: "Building Vertex: A Learning Platform Where Search Links to the Exact Second"
+description: "How I built Vertex — a course platform on Next.js and Sanity where a plain language search query returns ranked cards, each linking to the exact timestamp in a lesson video where that topic is taught."
+publishedAt: "2026-09-21"
+tags:
+  - Next.js
+  - Architecture
+  - React
+  - TypeScript
+featured: false
+draft: false
+---
+
+Most learning platforms treat video as a black box. You search for "async generators", get back a list of courses, click one, and then scrub through a two-hour video looking for the three minutes that matter to you. That friction is the problem Vertex is built to solve.
+
+The premise is simple: every search result should link not to a course page, but to the **exact second** in the lesson where the answer lives. The video plays in-place. No scrubbing.
+
+Here is how I built it.
+
+## The Architecture
+
+Vertex has two moving parts: a **Sanity** CMS where authors build courses, and a **Next.js** site that serves them to learners.
+
+```
+[Author in Sanity Studio]
+    Creates course → lessons → segments with timestamps
+           │
+           ▼
+[Sanity Content Lake]
+    Stores structured course data + transcript segments
+           │
+           ▼
+[Next.js (App Router, SSG)]
+    Fetches at build time → generates static course pages
+           │
+           ▼
+[Search Index]
+    Built from transcript segments, each tagged with a timestamp
+           │
+           ▼
+[Learner]
+    Types query → ranked result cards → clicks → video seeks to that second
+```
+
+The key insight is that Sanity stores lessons not as monolithic video blobs, but as **structured segments** — each segment has a start time, a topic label, and a transcript excerpt. The search index is built from these segments, not from the top-level lesson metadata.
+
+## How the Search Works
+
+When a learner types a plain language query, the search runs against the segment index. Each match returns:
+
+- The segment's topic text
+- The course and lesson it belongs to
+- The **timestamp** of that segment
+
+The result card renders the course thumbnail, the lesson title, and a formatted timestamp badge. Clicking it navigates to the lesson page with a `?t=142` query param (or whatever the second is), and the video player seeks to that point on mount.
+
+```tsx title="app/lessons/[slug]/page.tsx" {11-12}
+export default async function LessonPage({ searchParams }: Props) {
+  const lesson = await getLesson(params.slug);
+  const startTime = Number(searchParams.t ?? 0);
+
+  return (
+    <main>
+      <VideoPlayer
+        src={lesson.videoUrl}
+        // Seek to the timestamp from the search result
+        initialTime={startTime}
+      />
+      <LessonSegments segments={lesson.segments} currentTime={startTime} />
+    </main>
+  );
+}
+```
+
+<Callout type="info" title="Why query params instead of hash fragments">
+  Hash fragments (`#t=142`) are never sent to the server, so they cannot be used for SSR or for sharing a link that works on first load. A `?t=` query param is picked up by the server, passed to the player as a prop, and the initial seek happens before the user sees the page.
+</Callout>
+
+## Content Modelling in Sanity
+
+The schema that makes this work is a `lesson` document with a `segments` array:
+
+```ts title="sanity/schemas/lesson.ts"
+defineType({
+  name: "lesson",
+  type: "document",
+  fields: [
+    defineField({ name: "title", type: "string" }),
+    defineField({ name: "videoUrl", type: "url" }),
+    defineField({
+      name: "segments",
+      type: "array",
+      of: [
+        defineArrayMember({
+          type: "object",
+          fields: [
+            defineField({ name: "startTime", type: "number" }),
+            defineField({ name: "topic", type: "string" }),
+            defineField({ name: "transcript", type: "text" }),
+          ],
+        }),
+      ],
+    }),
+  ],
+});
+```
+
+Authors fill in segments manually or paste them from a transcript tool. The `startTime` is in seconds. Sanity's array editor makes it straightforward to add, reorder, and delete segments while watching the video in a separate tab.
+
+## Building the Search Index at Build Time
+
+The search index is a flat JSON file generated at build time from the Sanity data. Each entry is one segment:
+
+```ts title="scripts/build-index.ts"
+const segments = await client.fetch(
+  `*[_type == "lesson"]{
+    _id, title, slug,
+    "courseTitle": course->title,
+    segments[]{ startTime, topic, transcript }
+  }`
+);
+
+const index = segments.flatMap((lesson) =>
+  lesson.segments.map((seg) => ({
+    id: `${lesson._id}-${seg.startTime}`,
+    lessonSlug: lesson.slug.current,
+    courseTitle: lesson.courseTitle,
+    lessonTitle: lesson.title,
+    topic: seg.topic,
+    transcript: seg.transcript,
+    startTime: seg.startTime,
+  }))
+);
+
+fs.writeFileSync("public/search-index.json", JSON.stringify(index));
+```
+
+The client loads this JSON on demand and runs MiniSearch against it with topic matches ranked above transcript matches.
+
+## What I Learned
+
+**Structured content beats unstructured video.** The hard part of this project was not the search UI or the video player — it was convincing myself to break lessons into segments instead of treating a lesson as a single uploadable video. Once the content model was right, the rest followed naturally.
+
+**Timestamp-based deep linking is underused.** The `?t=` pattern is well understood (YouTube does it) but almost no learning platforms surface it as a first-class feature from the search results page. Making it the default instead of an afterthought changes how learners use the product.
+
+**Static generation plus a JSON index is good enough at this scale.** Running a search server for a platform with a few hundred lessons is overkill. A flat JSON file served from a CDN, loaded once, and queried in memory is fast, cheap, and eliminates a whole category of infrastructure decisions.
+
+The source is on [GitHub](https://github.com/R4nz5r/Vertex-learning-platform).
