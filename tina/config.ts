@@ -1,5 +1,4 @@
 import { defineConfig } from "tinacms";
-import { siteConfig } from "../site.config";
 
 const branch =
   process.env.GITHUB_BRANCH ||
@@ -80,7 +79,6 @@ export default defineConfig({
             name: "tags",
             label: "Tags",
             list: true,
-            options: [...siteConfig.tags],
             required: true,
           },
           {

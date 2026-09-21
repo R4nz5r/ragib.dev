@@ -5,7 +5,7 @@ import { z } from "zod";
 import { siteConfig } from "@/site.config";
 import { extractToc, type TocItem } from "@/lib/toc";
 
-const validTags = siteConfig.tags as readonly string[];
+
 
 /**
  * Zod schema for frontmatter validation as specified in AGENTS.md Section 8.
@@ -27,14 +27,8 @@ export const PostFrontmatterSchema = z.object({
       { message: "Invalid date format. Expected a valid ISO date string" }
     ),
   tags: z
-    .array(z.string())
-    .min(1, "At least one tag is required")
-    .refine(
-      (tags: string[]) => tags.every((tag) => validTags.includes(tag)),
-      {
-        message: `Unknown tag(s) found. Tags must match site.config.ts: [${validTags.join(", ")}]`,
-      }
-    ),
+    .array(z.string().min(1, "Tag cannot be empty"))
+    .min(1, "At least one tag is required"),
   updatedAt: z
     .string()
     .refine((val) => !isNaN(Date.parse(val)), {
