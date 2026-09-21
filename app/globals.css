@@ -171,7 +171,6 @@ body {
 /* Custom Scrollbars (dark by default, transparent track) */
 * {
   scrollbar-width: thin;
-  scrollbar-color: var(--surface-3) transparent;
 }
 ::-webkit-scrollbar {
   width: 6px;
@@ -186,6 +185,11 @@ body {
 }
 ::-webkit-scrollbar-thumb:hover {
   background-color: var(--border-strong);
+}
+::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 
 h1, h2, h3, h4, p, figure, blockquote, ul, ol, dl, dd {
@@ -674,6 +678,19 @@ button {
   flex-wrap: wrap;
   gap: var(--s-1);
 }
+/* Hero now.ts code block — guaranteed zero scrollbar and clean fit */
+.hero [data-slot="now"] .code__pre {
+  overflow-x: hidden !important;
+  scrollbar-width: none !important;
+  font-size: 13.5px;
+}
+.hero [data-slot="now"] .code__pre::-webkit-scrollbar {
+  display: none !important;
+}
+.hero [data-slot="now"] .line::before {
+  width: 24px;
+  margin: 0 var(--s-1);
+}
 .signup {
   display: flex;
   flex-direction: column;
@@ -972,14 +989,13 @@ button {
   line-height: 24px;
   tab-size: 2;
   scrollbar-width: thin;
-  scrollbar-color: var(--surface-3) transparent;
 }
 .code__pre::-webkit-scrollbar {
   height: 6px;
   width: 6px;
 }
 .code__pre::-webkit-scrollbar-track {
-  background: transparent;
+  background: var(--code-bg) !important;
 }
 .code__pre::-webkit-scrollbar-thumb {
   background-color: var(--surface-3);
@@ -987,6 +1003,11 @@ button {
 }
 .code__pre::-webkit-scrollbar-thumb:hover {
   background-color: var(--border-strong);
+}
+.code__pre::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 .code__pre code {
   display: block;
