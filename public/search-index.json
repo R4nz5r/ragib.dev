@@ -46,5 +46,20 @@
     "publishedAt": "2026-09-21T00:00:00.000Z",
     "readingTime": 4,
     "cover": "/posts/vertex.jpg"
+  },
+  {
+    "slug": "building-an-ai-powered-form-builder-with-gemini-react-19-and-postgresql",
+    "title": "Building an AI-Powered Form Builder with Gemini, React 19, and PostgreSQL",
+    "description": "How I built a full-stack form builder featuring Gemini AI prompt-to-form generation, drag-and-drop customization with @dnd-kit, and real-time response analytics.",
+    "tags": [
+      "React",
+      "TypeScript",
+      "Architecture",
+      "PostgreSQL",
+      "AI"
+    ],
+    "publishedAt": "2026-09-20T20:01:09.259Z",
+    "readingTime": 2,
+    "cover": "/posts/form.jpg"
   }
 ]
