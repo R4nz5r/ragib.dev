@@ -1,31 +1,31 @@
 ---
-title: "Building Popcorn: Real-Time Synchronized Watch Parties"
-description: "How I built Popcorn—a real-time watch party platform featuring sub-second video synchronization, WebRTC screen sharing, and live chat with Next.js and Socket.io."
-publishedAt: "2026-09-21"
+title: 'Building Popcorn: Real-Time Synchronized Watch Parties'
+description: 'How I built Popcorn—a real-time watch party platform featuring sub-second video synchronization, WebRTC screen sharing, and live chat with Next.js and Socket.io.'
+publishedAt: 2026-09-21T00:00:00.000Z
 tags:
   - Next.js
   - TypeScript
   - Architecture
-featured: true
-cover: "/posts/popcorn/cover.png"
+featured: false
+cover: /posts/popcorn/cover.png
 draft: false
 ---
 
-Watching videos online with friends often leads to the same frustrating countdown: *"3, 2, 1... press play!"* and someone is always three seconds behind. 
+Watching videos online with friends often leads to the same frustrating countdown: *"3, 2, 1... press play!"* and someone is always three seconds behind.
 
 To solve this, I built **[Popcorn](https://popcorn.ragibshahrier.com/)**, an open-source watch-party web application that keeps video playback synchronized across all participants with low latency, integrated chat, host controls, and peer-to-peer screen sharing.
 
----
+***
 
 ## The Tech Stack
 
-- **Frontend & App Framework**: Next.js (App Router), React, TypeScript, Tailwind CSS
-- **Real-Time Sync & Chat**: Socket.io (Node.js & TypeScript)
-- **Database & Persistence**: MongoDB Atlas
-- **Media Playback**: YouTube IFrame Player API
-- **Screen Sharing**: WebRTC Peer-to-Peer connections
+* **Frontend & App Framework**: Next.js (App Router), React, TypeScript, Tailwind CSS
+* **Real-Time Sync & Chat**: Socket.io (Node.js & TypeScript)
+* **Database & Persistence**: MongoDB Atlas
+* **Media Playback**: YouTube IFrame Player API
+* **Screen Sharing**: WebRTC Peer-to-Peer connections
 
----
+***
 
 ## How Video Synchronization Works
 
@@ -49,7 +49,7 @@ function handleSeek(targetSeconds: number) {
 }
 ```
 
----
+***
 
 ## Live Demo & Source Code
 
