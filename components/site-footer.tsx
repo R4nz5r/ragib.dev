@@ -65,13 +65,14 @@ export function SiteFooter() {
                 .filter((item) => item.published)
                 .map((item) => {
                   const isExternal = "external" in item && Boolean(item.external);
+                  const isNewTab = "newTab" in item && Boolean((item as { newTab?: boolean }).newTab);
                   if (isExternal) {
                     return (
                       <a
                         key={item.href}
                         href={item.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                        target={isNewTab ? "_blank" : undefined}
+                        rel={isNewTab ? "noopener noreferrer" : undefined}
                         className="inline-flex items-center gap-1 text-[14px] leading-[24px] text-text-3 w-fit transition-colors duration-150 hover:text-accent-text"
                       >
                         <span>{item.label}</span>
@@ -97,8 +98,6 @@ export function SiteFooter() {
               </h3>
               <a
                 href={siteConfig.links.portfolio}
-                target="_blank"
-                rel="noopener noreferrer"
                 className="inline-flex items-center gap-1 text-[14px] leading-[24px] text-text-3 w-fit transition-colors duration-150 hover:text-accent-text"
               >
                 <span>Portfolio</span>

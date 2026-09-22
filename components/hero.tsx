@@ -20,8 +20,6 @@ export async function Hero() {
                 as="a"
                 variant="outline"
                 href={siteConfig.links.portfolio}
-                target="_blank"
-                rel="noopener noreferrer"
               >
                 <Icon name="external" size={16} />
                 <span>Portfolio</span>

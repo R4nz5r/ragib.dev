@@ -23,6 +23,7 @@ export const siteConfig = {
       href: "https://ragibshahrier.com",
       published: true,
       external: true,
+      newTab: false,
     },
   ],
   tags: [

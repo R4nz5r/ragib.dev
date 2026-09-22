@@ -52,13 +52,14 @@ export function SiteHeader() {
             <nav className="desktop-nav items-center gap-s-1" aria-label="Primary">
               {publishedNav.map((item) => {
                 const isExternal = "external" in item && Boolean(item.external);
+                const isNewTab = "newTab" in item && Boolean((item as { newTab?: boolean }).newTab);
                 const isActive = !isExternal && isItemActive(item.href);
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
-                    target={isExternal ? "_blank" : undefined}
-                    rel={isExternal ? "noopener noreferrer" : undefined}
+                    target={isNewTab ? "_blank" : undefined}
+                    rel={isNewTab ? "noopener noreferrer" : undefined}
                     aria-current={isActive ? "page" : undefined}
                     className={[
                       "relative inline-flex items-center gap-1.5 h-10 px-s-2 rounded-r-md",
@@ -116,13 +117,14 @@ export function SiteHeader() {
         <nav className="mobile-nav border-b border-border bg-surface" aria-label="Mobile">
           {publishedNav.map((item) => {
             const isExternal = "external" in item && Boolean(item.external);
+            const isNewTab = "newTab" in item && Boolean((item as { newTab?: boolean }).newTab);
             const isActive = !isExternal && isItemActive(item.href);
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                target={isExternal ? "_blank" : undefined}
-                rel={isExternal ? "noopener noreferrer" : undefined}
+                target={isNewTab ? "_blank" : undefined}
+                rel={isNewTab ? "noopener noreferrer" : undefined}
                 aria-current={isActive ? "page" : undefined}
                 onClick={() => setMenuOpen(false)}
                 className={[
