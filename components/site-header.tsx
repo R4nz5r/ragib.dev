@@ -54,25 +54,39 @@ export function SiteHeader() {
                 const isExternal = "external" in item && Boolean(item.external);
                 const isNewTab = "newTab" in item && Boolean((item as { newTab?: boolean }).newTab);
                 const isActive = !isExternal && isItemActive(item.href);
+                const linkClass = [
+                  "relative inline-flex items-center gap-1.5 h-10 px-s-2 rounded-r-md",
+                  "font-semibold text-[14px] leading-[24px]",
+                  "transition-[color,background-color] duration-150",
+                  "focus-visible:outline-2 focus-visible:outline-accent-text focus-visible:outline-offset-2",
+                  isActive
+                    ? "text-text"
+                    : "text-text-3 hover:text-text hover:bg-surface-2",
+                ].join(" ");
+
+                if (isExternal) {
+                  return (
+                    <a
+                      key={item.href}
+                      href={item.href}
+                      target={isNewTab ? "_blank" : undefined}
+                      rel={isNewTab ? "noopener noreferrer" : undefined}
+                      className={linkClass}
+                    >
+                      <span>{item.label}</span>
+                      <Icon name="external" size={16} className="text-text-4" />
+                    </a>
+                  );
+                }
+
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
-                    target={isNewTab ? "_blank" : undefined}
-                    rel={isNewTab ? "noopener noreferrer" : undefined}
                     aria-current={isActive ? "page" : undefined}
-                    className={[
-                      "relative inline-flex items-center gap-1.5 h-10 px-s-2 rounded-r-md",
-                      "font-semibold text-[14px] leading-[24px]",
-                      "transition-[color,background-color] duration-150",
-                      "focus-visible:outline-2 focus-visible:outline-accent-text focus-visible:outline-offset-2",
-                      isActive
-                        ? "text-text"
-                        : "text-text-3 hover:text-text hover:bg-surface-2",
-                    ].join(" ")}
+                    className={linkClass}
                   >
                     <span>{item.label}</span>
-                    {isExternal && <Icon name="external" size={16} className="text-text-4" />}
                     {isActive && (
                       <span className="absolute left-s-2 right-s-2 -bottom-3 h-0.5 rounded-t-sm bg-accent-text" />
                     )}
@@ -119,23 +133,38 @@ export function SiteHeader() {
             const isExternal = "external" in item && Boolean(item.external);
             const isNewTab = "newTab" in item && Boolean((item as { newTab?: boolean }).newTab);
             const isActive = !isExternal && isItemActive(item.href);
+            const mobileClass = [
+              "flex items-center justify-between h-12 px-s-2",
+              "font-semibold text-[16px] leading-[24px]",
+              "border-t border-border first:border-t-0",
+              isActive ? "text-accent-text" : "text-text-2",
+            ].join(" ");
+
+            if (isExternal) {
+              return (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  target={isNewTab ? "_blank" : undefined}
+                  rel={isNewTab ? "noopener noreferrer" : undefined}
+                  onClick={() => setMenuOpen(false)}
+                  className={mobileClass}
+                >
+                  <span>{item.label}</span>
+                  <Icon name="external" size={16} className="text-text-4" />
+                </a>
+              );
+            }
+
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                target={isNewTab ? "_blank" : undefined}
-                rel={isNewTab ? "noopener noreferrer" : undefined}
                 aria-current={isActive ? "page" : undefined}
                 onClick={() => setMenuOpen(false)}
-                className={[
-                  "flex items-center justify-between h-12 px-s-2",
-                  "font-semibold text-[16px] leading-[24px]",
-                  "border-t border-border first:border-t-0",
-                  isActive ? "text-accent-text" : "text-text-2",
-                ].join(" ")}
+                className={mobileClass}
               >
                 <span>{item.label}</span>
-                {isExternal && <Icon name="external" size={16} className="text-text-4" />}
               </Link>
             );
           })}
