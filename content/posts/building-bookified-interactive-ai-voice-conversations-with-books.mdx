@@ -1,0 +1,364 @@
+---
+title: 'Building Bookified: Turning Books into Interactive Spoken AI Conversations'
+description: 'How I built Bookified — an AI voice platform on Next.js, Vapi, and MongoDB where users upload books, extract structured text segments in the browser, and have real-time voice discussions with low-latency tool calling.'
+publishedAt: 2026-09-23T10:00:00.000Z
+tags:
+  - Next.js
+  - React
+  - TypeScript
+  - Architecture
+  - AI
+featured: false
+cover: /posts/bookified.png
+draft: false
+---
+
+Reading a dense 300-page book is often a passive experience. You highlight a few sentences, turn the pages, and a month later remember perhaps ten percent of what you read. The deepest comprehension happens not through passive consumption, but through active dialogue: questioning arguments, asking for counter-examples, and discussing ideas out loud.
+
+That insight is the foundation of **[Bookified](https://bookified-dun.vercel.app/)** — an open-source web application that transforms books into interactive, spoken AI conversations. Instead of scrolling through text or listening to an unyielding audiobook, readers can have natural, two-way voice conversations with their books in real time.
+
+You can try the live application at [bookified-dun.vercel.app](https://bookified-dun.vercel.app/) or inspect the source code on [GitHub](https://github.com/R4nz5r/Bookified).
+
+Here is a deep dive into how I architected and built it.
+
+***
+
+## The High-Level Architecture
+
+Bookified combines a Next.js 16 App Router frontend with browser-side document processing, MongoDB compound text indexing, and real-time WebRTC voice streaming powered by Vapi and ElevenLabs.
+
+```
+[Reader Uploads PDF]
+       │
+       ▼
+[Client-Side Worker (pdfjs-dist)]
+   ├─► Renders Page 1 to <canvas> ──► Auto-generates cover image
+   ├─► Extracts raw page text
+   └─► Splits into 500-word segments (50-word sliding overlap)
+       │
+       ▼
+[Direct-to-Blob Storage (@vercel/blob)]
+   ├─► Uploads full PDF document
+   └─► Uploads generated cover PNG
+       │
+       ▼
+[MongoDB Atlas Database]
+   ├─► Saves Book metadata (title, author, persona, blob URLs)
+   └─► Batch-inserts BookSegments with compound text index { bookId: 1, content: "text" }
+       │
+       ▼
+[Voice Session on /books/[slug]]
+   ├─► Initializes WebRTC call via @vapi-ai/web + ElevenLabs voice
+   ├─► Reader speaks question into microphone
+   │
+   ▼
+[Vapi Function Calling Webhook (/api/vapi/search-book)]
+   ├─► Vapi triggers "searchBook" tool with { bookId, query }
+   ├─► Next.js executes scoped text search on MongoDB segments
+   └─► Returns top relevant book excerpts back to Vapi
+       │
+       ▼
+[Real-Time Spoken Response]
+   └─► Vapi streams natural audio back to reader + live transcripts in UI
+```
+
+The system is deliberately architected so the server never touches raw PDF binaries or heavy OCR libraries. The client handles document parsing, while the server coordinates secure blob tokens, data persistence, and low-latency retrieval.
+
+***
+
+## Client-Side PDF Extraction & Dynamic Cover Generation
+
+Running PDF parsing and image rendering on serverless functions is notoriously problematic. Native canvas dependencies (`node-canvas`), headless browsers, or heavy C++ bindings bloat deployment bundles, consume significant RAM, and easily hit Vercel's execution time and payload limits.
+
+Instead, Bookified offloads PDF parsing entirely to the user's browser using `pdfjs-dist` running in a dedicated Web Worker.
+
+When a user selects a PDF:
+1. `pdfjs-dist` loads the document in memory.
+2. It renders page 1 directly onto an off-screen HTML5 `<canvas>` at 2x scale to produce a crisp cover image data URL.
+3. It iterates through all pages to extract text tokens into a unified string.
+
+```typescript title="lib/utils.ts" {18-29,35-43}
+export async function parsePDFFile(file: File) {
+  const pdfjsLib = await import("pdfjs-dist");
+
+  if (typeof window !== "undefined") {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+      "pdfjs-dist/build/pdf.worker.min.mjs",
+      import.meta.url
+    ).toString();
+  }
+
+  const arrayBuffer = await file.arrayBuffer();
+  const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+  const pdfDocument = await loadingTask.promise;
+
+  // 1. Render first page to canvas to auto-generate book cover
+  const firstPage = await pdfDocument.getPage(1);
+  const viewport = firstPage.getViewport({ scale: 2 }); // 2x scale for high PPI
+
+  const canvas = document.createElement("canvas");
+  canvas.width = viewport.width;
+  canvas.height = viewport.height;
+  const context = canvas.getContext("2d");
+
+  await firstPage.render({
+    canvasContext: context!,
+    viewport,
+    canvas,
+  }).promise;
+
+  const coverDataURL = canvas.toDataURL("image/png");
+
+  // 2. Extract text across all pages
+  let fullText = "";
+  for (let pageNum = 1; pageNum <= pdfDocument.numPages; pageNum++) {
+    const page = await pdfDocument.getPage(pageNum);
+    const textContent = await page.getTextContent();
+    const pageText = textContent.items
+      .filter((item) => "str" in item)
+      .map((item) => (item as { str: string }).str)
+      .join(" ");
+    fullText += pageText + "\n";
+  }
+
+  const segments = splitIntoSegments(fullText);
+  await pdfDocument.destroy();
+
+  return { content: segments, cover: coverDataURL };
+}
+```
+
+Once parsed, both the PDF binary and the generated cover image are uploaded directly to `@vercel/blob` via client-side signed uploads. The Next.js route handler (`/api/upload`) only validates the user's Clerk session and generates short-lived upload tokens, keeping server execution under 50ms.
+
+***
+
+## Contextual Chunking with Sliding Windows
+
+A naive text split by hard character count or page boundary frequently breaks thoughts mid-sentence. If an explanation starts at the bottom of page 42 and finishes on page 43, a rigid split produces two half-formed snippets that confuse the language model.
+
+To preserve semantic context without inflating storage, Bookified uses a sliding word window: 500 words per segment with a 50-word overlap.
+
+```typescript title="lib/utils.ts" {18-28}
+export const splitIntoSegments = (
+  text: string,
+  segmentSize: number = 500, // Maximum words per segment
+  overlapSize: number = 50    // Overlapping words for context continuity
+): TextSegment[] => {
+  const words = text.split(/\s+/).filter((word) => word.length > 0);
+  const segments: TextSegment[] = [];
+
+  let segmentIndex = 0;
+  let startIndex = 0;
+
+  while (startIndex < words.length) {
+    const endIndex = Math.min(startIndex + segmentSize, words.length);
+    const segmentWords = words.slice(startIndex, endIndex);
+
+    segments.push({
+      text: segmentWords.join(" "),
+      segmentIndex,
+      wordCount: segmentWords.length,
+    });
+
+    segmentIndex++;
+    if (endIndex >= words.length) break;
+
+    // Slide window forward by (segmentSize - overlapSize)
+    startIndex = endIndex - overlapSize;
+  }
+
+  return segments;
+};
+```
+
+This ensures that key concepts, quotes, and terminology spanning chunk boundaries remain searchable in both adjacent segments.
+
+***
+
+## Sub-Second Scoped Retrieval in MongoDB
+
+In an interactive voice conversation, latency is paramount. If the AI pauses for five seconds while performing an unindexed scan or dense vector search across millions of embeddings, the conversational illusion is broken.
+
+Because queries in Bookified are always confined to the specific book the reader is currently discussing, we do not need an expensive vector database. Instead, Bookified models book content in MongoDB with a compound text index scoped to the `bookId`.
+
+```typescript title="database/models/book-segment.model.ts" {17,19}
+const BookSegmentSchema = new Schema<IBookSegment>(
+  {
+    clerkId: { type: String, required: true },
+    bookId: {
+      type: Schema.Types.ObjectId,
+      ref: "Book",
+      required: true,
+      index: true,
+    },
+    content: { type: String, required: true },
+    segmentIndex: { type: Number, required: true, index: true },
+    pageNumber: { type: Number, index: true },
+    wordCount: { type: Number, required: true },
+  },
+  { timestamps: true }
+);
+
+// Compound index for strict isolation and fast ordering
+BookSegmentSchema.index({ bookId: 1, segmentIndex: 1 }, { unique: true });
+// Compound text index scoped by book
+BookSegmentSchema.index({ bookId: 1, content: "text" });
+```
+
+### The Search Implementation
+
+The search query prioritizes MongoDB's native `$text` score. If a text index is still building or the query consists of conversational keywords, it gracefully falls back to a regex match on keywords, while sanitizing input strings with `escapeRegex` to prevent ReDoS (Regular Expression Denial of Service) vulnerabilities:
+
+```typescript title="lib/actions/book.actions.ts" {13-22,27-36}
+export const searchBookSegments = async (
+  bookId: string,
+  query: string,
+  limit: number = 3
+) => {
+  await connectToDatabase();
+  const bookObjectId = new mongoose.Types.ObjectId(bookId);
+
+  let segments: Record<string, unknown>[] = [];
+
+  // 1. Attempt MongoDB text search ranked by score
+  try {
+    segments = await BookSegment.find({
+      bookId: bookObjectId,
+      $text: { $search: query },
+    })
+      .select("_id bookId content segmentIndex pageNumber wordCount")
+      .sort({ score: { $meta: "textScore" } })
+      .limit(limit)
+      .lean();
+  } catch {
+    segments = [];
+  }
+
+  // 2. Fallback: regex search matching any significant keyword
+  if (segments.length === 0) {
+    const keywords = query.split(/\s+/).filter((k) => k.length > 2);
+    const pattern = keywords.map(escapeRegex).join("|");
+
+    segments = await BookSegment.find({
+      bookId: bookObjectId,
+      content: { $regex: pattern, $options: "i" },
+    })
+      .select("_id bookId content segmentIndex pageNumber wordCount")
+      .sort({ segmentIndex: 1 })
+      .limit(limit)
+      .lean();
+  }
+
+  return { success: true, data: serializeData(segments) };
+};
+```
+
+This scoped retrieval executes in under 25 milliseconds, providing accurate excerpts directly to the voice assistant before the listener notices any delay.
+
+***
+
+## Real-Time Voice Pipeline & Tool Calling
+
+The voice conversation is driven by `@vapi-ai/web`, connecting the browser directly to Vapi's WebRTC audio pipeline configured with ElevenLabs speech synthesis (`eleven_turbo_v2_5`).
+
+### Tool Calling Webhook (`/api/vapi/search-book`)
+
+Rather than dumping the entire book text into the system prompt, the assistant uses **tool calling**. When the reader asks a question about the author's ideas, Vapi recognizes that it needs external factual grounding and issues a tool call to our Next.js API route.
+
+```typescript title="app/api/vapi/search-book/route.ts" {16-24}
+export async function POST(request: Request) {
+  try {
+    const body = await request.json();
+    const toolCallList = body?.message?.toolCallList || body?.message?.toolCalls;
+
+    if (!toolCallList || toolCallList.length === 0) {
+      return NextResponse.json({ results: [{ result: "No tool calls found" }] });
+    }
+
+    const results = [];
+
+    for (const toolCall of toolCallList) {
+      const { id, function: func } = toolCall;
+      const args = parseArgs(func?.arguments);
+
+      if (func?.name === "searchBook") {
+        const searchResult = await searchBookSegments(
+          String(args.bookId),
+          String(args.query),
+          3
+        );
+
+        const combinedText = searchResult.data?.length
+          ? searchResult.data.map((s: any) => s.content).join("\n\n")
+          : "No information found about this topic in the book.";
+
+        results.push({ toolCallId: id, result: combinedText });
+      }
+    }
+
+    return NextResponse.json({ results });
+  } catch (error) {
+    return NextResponse.json({ results: [{ result: "Error processing request" }] });
+  }
+}
+```
+
+<Callout type="info" title="Why Tool Calling Beats Long Context Windows">
+  Even with modern 1M+ token context windows, stuffing an entire 100,000-word book into every conversation turn causes two problems: massive cost per voice interaction and significant generation latency. Real-time voice demands sub-second responses. On-demand tool calling retrieves only the top 3 relevant passages (~1,500 words) exactly when needed.
+</Callout>
+
+### Managing Voice States in the Client
+
+In `hooks/useVapi.ts`, a custom React hook tracks WebRTC call status, speech detection, and partial transcripts to deliver immediate visual feedback.
+
+The hook subscribes to Vapi events:
+* `speech-start`: Flags the assistant or reader as speaking.
+* `speech-end`: Transitions the UI into `listening` or `thinking`.
+* `message`: Catches real-time partial transcripts so the reader sees their words appearing on screen word-for-word as they speak.
+
+```typescript title="hooks/useVapi.ts" {14-23,28-36}
+// Real-time message streaming from Vapi WebRTC session
+getVapi().on("message", (message: any) => {
+  if (message.type !== "transcript") return;
+
+  // When user finishes speaking, switch to thinking state
+  if (message.role === "user" && message.transcriptType === "final") {
+    setStatus("thinking");
+    setCurrentUserMessage("");
+  }
+
+  // Partial user transcript — render real-time speech
+  if (message.role === "user" && message.transcriptType === "partial") {
+    setCurrentUserMessage(message.transcript);
+  }
+
+  // Partial AI transcript — stream word-by-word assistant response
+  if (message.role === "assistant" && message.transcriptType === "partial") {
+    setCurrentMessage(message.transcript);
+  }
+
+  // Final transcript — append to persistent conversation history
+  if (message.transcriptType === "final") {
+    setMessages((prev) => [
+      ...prev,
+      { role: message.role, content: message.transcript }
+    ]);
+  }
+});
+```
+
+***
+
+## Key Takeaways
+
+Building Bookified reinforced several architectural principles for modern full-stack AI applications:
+
+1. **Push Heavy File Work to the Client**: Browser APIs like Canvas and Web Workers via `pdfjs-dist` are capable of performing document rasterization and token extraction, saving compute costs and eliminating serverless timeouts.
+2. **Compound Scoped Indexing is Fast**: For document-specific Q&A, a scoped compound text index in MongoDB offers sub-30ms retrieval with zero embedding overhead.
+3. **Voice UX Demands Latency Discipline**: Every millisecond matters when synthesizing voice. Tool calling keeps context payloads small, ensuring ElevenLabs streams audio back before conversational awkwardness sets in.
+
+***
+
+## Try It Out
+
+Experience the live application at [bookified-dun.vercel.app](https://bookified-dun.vercel.app/) or explore the full implementation on [GitHub](https://github.com/R4nz5r/Bookified).

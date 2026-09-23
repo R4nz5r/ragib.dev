@@ -1,5 +1,20 @@
 [
   {
+    "slug": "building-bookified-interactive-ai-voice-conversations-with-books",
+    "title": "Building Bookified: Turning Books into Interactive Spoken AI Conversations",
+    "description": "How I built Bookified — an AI voice platform on Next.js, Vapi, and MongoDB where users upload books, extract structured text segments in the browser, and have real-time voice discussions with low-latency tool calling.",
+    "tags": [
+      "Next.js",
+      "React",
+      "TypeScript",
+      "Architecture",
+      "AI"
+    ],
+    "publishedAt": "2026-09-23T10:00:00.000Z",
+    "readingTime": 9,
+    "cover": "/posts/bookified.png"
+  },
+  {
     "slug": "building-fast-web-apps-with-nextjs",
     "title": "Building Fast Web Apps with Next.js",
     "description": "Notes and architectural insights on Building Fast Web Apps with Next.js.",
