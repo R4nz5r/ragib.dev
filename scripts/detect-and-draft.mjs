@@ -174,7 +174,13 @@ async function fetchRepoReadme(org, repo, githubToken) {
  * Draft blog post using Google Gemini Flash (free-tier).
  */
 async function draftWithGemini(apiKey, projectInfo) {
-  const models = ["gemini-flash-latest", "gemini-3.8-flash", "gemini-3.5-flash"];
+  const models = [
+    "gemini-flash-latest",
+    "gemini-3.8-flash",
+    "gemini-3.5-flash",
+    "gemini-flash-lite-latest",
+    "gemini-3.5-flash-lite",
+  ];
   let lastError = null;
 
   for (const model of models) {
@@ -377,9 +383,106 @@ export default function Page() {
 }
 
 /**
+ * Extract cover image from README or generate live website screenshot.
+ * Downloads the image to public/posts/<slug>/cover.png.
+ */
+async function extractAndDownloadCover(projectInfo, slug) {
+  let imageUrl = null;
+
+  // 1. Try finding screenshot/banner in GitHub README
+  if (projectInfo.readme) {
+    const mdImageRegex = /!\[([^\]]*)\]\(([^)]+)\)/g;
+    let match;
+    while ((match = mdImageRegex.exec(projectInfo.readme)) !== null) {
+      const src = match[2].trim().split(" ")[0];
+      if (
+        !src.includes("badge") &&
+        !src.includes("shields.io") &&
+        !src.includes("license") &&
+        !src.includes("travis") &&
+        !src.includes("sonar") &&
+        !src.endsWith(".svg")
+      ) {
+        imageUrl = src;
+        break;
+      }
+    }
+
+    if (!imageUrl) {
+      const htmlImageRegex = /<img\s+[^>]*?src=["']([^"']+)["']/i;
+      const htmlMatch = htmlImageRegex.exec(projectInfo.readme);
+      if (htmlMatch) {
+        const src = htmlMatch[1].trim();
+        if (!src.includes("badge") && !src.includes("shields.io") && !src.endsWith(".svg")) {
+          imageUrl = src;
+        }
+      }
+    }
+
+    // Resolve relative GitHub URLs
+    if (imageUrl && !imageUrl.startsWith("http")) {
+      if (projectInfo.repoOrg && projectInfo.repoName) {
+        const cleanPath = imageUrl.replace(/^\.?\//, "");
+        imageUrl = `https://raw.githubusercontent.com/${projectInfo.repoOrg}/${projectInfo.repoName}/HEAD/${cleanPath}`;
+      } else {
+        imageUrl = null;
+      }
+    }
+  }
+
+  // 2. Fallback: Take live screenshot of deployed Vercel site via Microlink
+  if (!imageUrl && projectInfo.liveUrl) {
+    console.log(`📸 Capturing live website screenshot for ${projectInfo.liveUrl}...`);
+    imageUrl = `https://api.microlink.io?url=${encodeURIComponent(projectInfo.liveUrl)}&screenshot=true&meta=false&embed=screenshot.url`;
+  }
+
+  if (!imageUrl) {
+    return null;
+  }
+
+  // 3. Download image to public/posts/<slug>/cover.png
+  try {
+    console.log(`📥 Downloading cover image from: ${imageUrl}...`);
+    const res = await fetch(imageUrl, {
+      headers: { "User-Agent": "vercel-blog-bot" },
+      signal: AbortSignal.timeout(12000),
+    });
+
+    if (!res.ok) {
+      console.warn(`⚠️ Failed to download cover image (${res.status}). Skipping.`);
+      return null;
+    }
+
+    const arrayBuffer = await res.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
+    // Skip tiny icons/empty responses (< 2KB)
+    if (buffer.length < 2048) {
+      console.warn("⚠️ Image is too small (< 2KB), likely an icon. Skipping.");
+      return null;
+    }
+
+    const targetDir = path.join(ROOT_DIR, "public/posts", slug);
+    if (!fs.existsSync(targetDir)) {
+      fs.mkdirSync(targetDir, { recursive: true });
+    }
+
+    const filename = "cover.png";
+    const localFilePath = path.join(targetDir, filename);
+    fs.writeFileSync(localFilePath, buffer);
+    console.log(`🖼️ Saved cover image to ${path.relative(ROOT_DIR, localFilePath)}`);
+
+    return `/posts/${slug}/${filename}`;
+  } catch (err) {
+    console.warn(`⚠️ Error downloading cover image: ${err.message}. Using default placeholder.`);
+    return null;
+  }
+}
+
+/**
  * Format and write the MDX post file.
  */
-function writeMdxPost(draft) {
+function writeMdxPost(draft, coverPath = null) {
   let slug = slugify(draft.slug || draft.title);
   if (!slug) {
     slug = `project-${Date.now()}`;
@@ -407,6 +510,7 @@ function writeMdxPost(draft) {
 
   const escapedTitle = draft.title.replace(/'/g, "\\'");
   const escapedDesc = draft.description.replace(/'/g, "\\'");
+  const coverLine = coverPath ? `cover: ${coverPath}\n` : "";
 
   const fileContent = `---
 title: '${escapedTitle}'
@@ -415,7 +519,7 @@ publishedAt: ${publishedAt}
 tags:
 ${tagsList.map((tag) => `  - ${tag}`).join("\n")}
 featured: false
-draft: false
+${coverLine}draft: false
 ---
 
 ${draft.content.trim()}
@@ -450,6 +554,9 @@ function commitAndPublishToMain(slug, filename, projectInfo, draftTitle) {
       console.log(`\n🚀 Auto-publishing directly to main for instant live deployment...`);
       execSync("git checkout main");
       execSync(`git add "${path.join("content/posts", filename)}" "${path.relative(ROOT_DIR, STATE_FILE_PATH)}"`);
+      if (fs.existsSync(path.join(ROOT_DIR, "public/posts", slug))) {
+        execSync(`git add "${path.join("public/posts", slug)}"`);
+      }
       execSync(`git commit -m "feat(blog): auto-publish post for ${projectInfo.name}"`);
       execSync("git push origin main");
       console.log(`🎉 Successfully published directly to main! Vercel is now deploying your new post live.`);
@@ -466,6 +573,9 @@ function commitAndPublishToMain(slug, filename, projectInfo, draftTitle) {
   try {
     execSync(`git checkout -b "${branchName}"`);
     execSync(`git add "${path.join("content/posts", filename)}" "${path.relative(ROOT_DIR, STATE_FILE_PATH)}"`);
+    if (fs.existsSync(path.join(ROOT_DIR, "public/posts", slug))) {
+      execSync(`git add "${path.join("public/posts", slug)}"`);
+    }
     execSync(`git commit -m "feat(blog): auto-draft post for ${projectInfo.name}"`);
     execSync(`git push -u origin "${branchName}" --force`);
 
@@ -529,20 +639,29 @@ Features:
     };
 
     let draft;
-    if (geminiApiKey) {
-      draft = await draftWithGemini(geminiApiKey, mockProject);
-    } else if (groqApiKey) {
-      draft = await draftWithGroq(groqApiKey, mockProject);
-    } else {
-      console.log("ℹ️ No LLM API key provided; using built-in developer fallback template.");
+    try {
+      if (geminiApiKey) {
+        draft = await draftWithGemini(geminiApiKey, mockProject);
+      } else if (groqApiKey) {
+        draft = await draftWithGroq(groqApiKey, mockProject);
+      } else {
+        console.log("ℹ️ No LLM API key provided; using built-in developer fallback template.");
+        draft = draftFallback(mockProject);
+      }
+    } catch (err) {
+      console.warn(`⚠️ AI drafting in mock mode encountered error (${err.message}). Using fallback template.`);
       draft = draftFallback(mockProject);
     }
 
-    const { fullPath } = writeMdxPost(draft);
+    const mockSlug = slugify(draft.slug || draft.title) || "vertex-mock";
+    const coverPath = await extractAndDownloadCover(mockProject, mockSlug);
+    const { fullPath, slug } = writeMdxPost(draft, coverPath);
 
     if (IS_DRY_RUN) {
       console.log("\n[DRY RUN] Post successfully written for verification. Deleting mock file...");
-      fs.unlinkSync(fullPath);
+      if (fs.existsSync(fullPath)) fs.unlinkSync(fullPath);
+      const mockCoverDir = path.join(ROOT_DIR, "public/posts", slug);
+      if (fs.existsSync(mockCoverDir)) fs.rmSync(mockCoverDir, { recursive: true, force: true });
       console.log("[DRY RUN] Mock test completed cleanly.");
       return;
     }
@@ -596,10 +715,14 @@ Features:
 
   // Extract Git repository details
   let repoUrl = "";
+  let repoOrg = null;
+  let repoName = null;
   let readme = null;
   const link = targetProject.link;
   if (link && link.type === "github" && link.org && link.repo) {
     repoUrl = `https://github.com/${link.org}/${link.repo}`;
+    repoOrg = link.org;
+    repoName = link.repo;
     readme = await fetchRepoReadme(link.org, link.repo, githubToken);
   }
 
@@ -608,6 +731,8 @@ Features:
     name: targetProject.name,
     liveUrl,
     repoUrl,
+    repoOrg,
+    repoName,
     readme,
   };
 
@@ -627,8 +752,12 @@ Features:
     draft = draftFallback(projectInfo);
   }
 
+  // Extract and download cover image (from README or live site screenshot)
+  const targetSlug = slugify(draft.slug || draft.title) || `project-${Date.now()}`;
+  const coverPath = await extractAndDownloadCover(projectInfo, targetSlug);
+
   // Write MDX file
-  const { filename, slug } = writeMdxPost(draft);
+  const { filename, slug } = writeMdxPost(draft, coverPath);
 
   // Update state
   seenSet.add(targetProject.id);
