@@ -420,21 +420,39 @@ ${draft.content.trim()}
 }
 
 /**
- * Open a GitHub Pull Request via gh CLI.
+ * Commit directly to main branch and push, triggering immediate Vercel deployment.
+ * Falls back to Pull Request if direct push to main is blocked by branch protection.
  */
-function createBranchAndPullRequest(slug, filename, projectInfo, draftTitle) {
+function commitAndPublishToMain(slug, filename, projectInfo, draftTitle) {
+  const preferPr = process.env.CREATE_PR === "true";
+
+  // Configure git identity if not set in CI
+  try {
+    execSync("git config user.name", { stdio: "ignore" });
+  } catch {
+    execSync('git config user.name "github-actions[bot]"');
+    execSync('git config user.email "41898282+github-actions[bot]@users.noreply.github.com"');
+  }
+
+  if (!preferPr) {
+    try {
+      console.log(`\n🚀 Auto-publishing directly to main for instant live deployment...`);
+      execSync("git checkout main");
+      execSync(`git add "${path.join("content/posts", filename)}" "${path.relative(ROOT_DIR, STATE_FILE_PATH)}"`);
+      execSync(`git commit -m "feat(blog): auto-publish post for ${projectInfo.name}"`);
+      execSync("git push origin main");
+      console.log(`🎉 Successfully published directly to main! Vercel is now deploying your new post live.`);
+      return;
+    } catch (err) {
+      console.warn(`⚠️ Direct push to main failed (${err.message}). Falling back to Pull Request...`);
+    }
+  }
+
+  // Fallback: Create branch and open Pull Request
   const branchName = `auto-post/${slug}`;
   console.log(`\n🌿 Creating git branch: ${branchName}...`);
 
   try {
-    // Configure git identity if not set in CI
-    try {
-      execSync("git config user.name", { stdio: "ignore" });
-    } catch {
-      execSync('git config user.name "github-actions[bot]"');
-      execSync('git config user.email "41898282+github-actions[bot]@users.noreply.github.com"');
-    }
-
     execSync(`git checkout -b "${branchName}"`);
     execSync(`git add "${path.join("content/posts", filename)}" "${path.relative(ROOT_DIR, STATE_FILE_PATH)}"`);
     execSync(`git commit -m "feat(blog): auto-draft post for ${projectInfo.name}"`);
@@ -450,11 +468,9 @@ A new Vercel project **${projectInfo.name}** was detected and drafted!
 ${projectInfo.repoUrl ? `- **Source Code**: ${projectInfo.repoUrl}` : ""}
 - **Draft File**: \`content/posts/${filename}\`
 
-> [!IMPORTANT]
-> **Human Review Required**
-> This post was automatically drafted by AI based on your project metadata and repository README.
-> Please review the technical details, format, and code examples, make any desired edits, and merge when ready.
-> Merging into \`main\` triggers the blog's normal Vercel deployment.
+> [!TIP]
+> **TinaCMS Editing**
+> Once merged into \`main\`, you can edit, polish, and upload custom covers anytime via TinaCMS at \`/admin\`.
 `;
 
     console.log(`🚀 Creating Pull Request via gh CLI...`);
@@ -612,8 +628,8 @@ Features:
     return;
   }
 
-  // In CI environment or when git is available, create branch & PR
-  createBranchAndPullRequest(slug, filename, projectInfo, draft.title);
+  // Auto-publish to main (or PR if fallback)
+  commitAndPublishToMain(slug, filename, projectInfo, draft.title);
 }
 
 main().catch((err) => {
