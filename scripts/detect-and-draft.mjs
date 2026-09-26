@@ -21,6 +21,17 @@ const ROOT_DIR = process.cwd();
 const STATE_FILE_PATH = path.join(ROOT_DIR, ".github/state/seen-vercel-projects.json");
 const POSTS_DIR = path.join(ROOT_DIR, "content/posts");
 
+// Load local .env files if available
+try {
+  if (fs.existsSync(path.join(ROOT_DIR, ".env.local"))) {
+    process.loadEnvFile?.(path.join(ROOT_DIR, ".env.local"));
+  } else if (fs.existsSync(path.join(ROOT_DIR, ".env"))) {
+    process.loadEnvFile?.(path.join(ROOT_DIR, ".env"));
+  }
+} catch {
+  // Ignore in CI or if file cannot be read
+}
+
 // Predefined blog tags from site.config.ts
 const ALLOWED_CORE_TAGS = [
   "TypeScript",
