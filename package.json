@@ -8,7 +8,8 @@
     "build": "tsx scripts/build-tina.ts && tsx scripts/build-search-index.ts && next build",
     "start": "next start",
     "lint": "eslint",
-    "new-post": "tsx scripts/new-post.ts"
+    "new-post": "tsx scripts/new-post.ts",
+    "bot:detect-and-draft": "node scripts/detect-and-draft.mjs"
   },
   "dependencies": {
     "@tinacms/cli": "^3.0.0",

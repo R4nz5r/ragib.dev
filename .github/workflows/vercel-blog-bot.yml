@@ -1,0 +1,55 @@
+name: Vercel Auto-Draft Blog Bot
+
+on:
+  schedule:
+    # Run once every hour at minute 0
+    - cron: '0 * * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (inspect output without creating branch or PR)'
+        required: false
+        default: 'false'
+        type: boolean
+      seed_state:
+        description: 'Seed state (mark all current Vercel projects as seen without drafting)'
+        required: false
+        default: 'false'
+        type: boolean
+
+concurrency:
+  group: vercel-blog-bot
+  cancel-in-progress: false
+
+jobs:
+  check-and-draft:
+    name: Check Vercel & Draft Post
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Run Vercel detector and drafter
+        env:
+          VERCEL_API_TOKEN: ${{ secrets.VERCEL_API_TOKEN }}
+          VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY || secrets.LLM_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DRY_RUN: ${{ inputs.dry_run || 'false' }}
+          SEED_STATE: ${{ inputs.seed_state || 'false' }}
+        run: |
+          node scripts/detect-and-draft.mjs
