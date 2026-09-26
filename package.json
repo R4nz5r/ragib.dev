@@ -9,7 +9,8 @@
     "start": "next start",
     "lint": "eslint",
     "new-post": "tsx scripts/new-post.ts",
-    "bot:detect-and-draft": "node scripts/detect-and-draft.mjs"
+    "bot:detect-and-draft": "node scripts/detect-and-draft.mjs",
+    "notify-subscribers": "node scripts/notify-subscribers.mjs"
   },
   "dependencies": {
     "@tinacms/cli": "^3.0.0",

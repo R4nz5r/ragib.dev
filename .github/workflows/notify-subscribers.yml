@@ -1,0 +1,56 @@
+name: Notify Blog Subscribers
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'content/posts/**.mdx'
+  workflow_dispatch:
+    inputs:
+      slug:
+        description: 'Post slug to notify about (leave empty to auto-detect)'
+        required: false
+        default: ''
+        type: string
+      dry_run:
+        description: 'Dry run (preview without sending)'
+        required: false
+        default: 'false'
+        type: boolean
+
+concurrency:
+  group: notify-subscribers
+  cancel-in-progress: false
+
+jobs:
+  notify:
+    name: Send Email Notifications
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Send email notifications
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          RESEND_AUDIENCE_ID: ${{ secrets.RESEND_AUDIENCE_ID }}
+          RESEND_FROM_EMAIL: ${{ secrets.RESEND_FROM_EMAIL || 'Ragib <newsletter@blog.ragibshahrier.com>' }}
+          NEXT_PUBLIC_SITE_URL: 'https://blog.ragibshahrier.com'
+          DRY_RUN: ${{ inputs.dry_run || 'false' }}
+        run: |
+          if [ -n "${{ inputs.slug }}" ]; then
+            node scripts/notify-subscribers.mjs --slug "${{ inputs.slug }}"
+          else
+            node scripts/notify-subscribers.mjs
+          fi
